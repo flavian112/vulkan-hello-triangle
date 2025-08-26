@@ -11,7 +11,7 @@ typedef struct {
     VkSemaphore *image_available;
     VkSemaphore *render_finished;
     VkFence *in_flight;
-    VkFence*   present_done;
+    VkFence *present_done;
     uint32_t count;
 } vk_sync_t;
 

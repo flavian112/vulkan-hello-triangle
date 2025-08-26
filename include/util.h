@@ -16,4 +16,3 @@
     } while (0)
 
 const char *vk_res_str(VkResult res);
-

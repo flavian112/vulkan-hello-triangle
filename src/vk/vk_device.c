@@ -184,8 +184,6 @@ bool vk_device_create(vk_device_t *device, VkInstance instance, VkSurfaceKHR sur
         dev_exts[dev_exts_count++] = portability_ext;
     }
 
-
-
     VkPhysicalDeviceFeatures features = {0};
     vkGetPhysicalDeviceFeatures(device->physical, &features);
 

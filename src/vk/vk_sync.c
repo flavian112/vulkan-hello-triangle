@@ -87,6 +87,5 @@ void vk_sync_destroy(vk_sync_t *sync, const vk_device_t *device) {
         sync->present_done = NULL;
     }
 
-
     memset(sync, 0, sizeof(*sync));
 }

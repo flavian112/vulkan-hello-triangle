@@ -1,5 +1,5 @@
 # project config
-APP       := vulkan-playground
+APP       := vulkan-hello-triangle
 BUILD     ?= release # release | debug
 SRCDIR    := src
 INCDIR    := include
@@ -9,8 +9,6 @@ CC        := clang
 CSTD      := -std=c23
 PKG       := vulkan glfw3
 RM        := rm -rf
-
-RUN_ARGS  ?=
 
 # tools / extras
 TIDY         ?= clang-tidy

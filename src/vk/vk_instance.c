@@ -120,7 +120,8 @@ bool vk_instance_create(vk_instance_t *instance) {
     const char *get_surface_ext = VK_KHR_GET_SURFACE_CAPABILITIES_2_EXTENSION_NAME;
     const bool has_get_surface_ext = has_extension(get_surface_ext);
 
-    const uint32_t exts_count = platform_exts_count + (uint32_t)has_compat_ext + (uint32_t)has_debug_ext + (uint32_t)has_surface_ext + (uint32_t)has_get_surface_ext;
+    const uint32_t exts_count = platform_exts_count + (uint32_t)has_compat_ext + (uint32_t)has_debug_ext +
+                                (uint32_t)has_surface_ext + (uint32_t)has_get_surface_ext;
     const char *exts[exts_count];
 
     uint32_t idx = 0;
