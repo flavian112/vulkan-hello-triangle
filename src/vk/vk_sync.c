@@ -19,6 +19,8 @@ bool vk_sync_create(vk_sync_t *sync, const vk_device_t *device, uint32_t frame_c
     assert(sync->render_finished != NULL);
     sync->in_flight = (VkFence *)malloc(frame_count * sizeof(*sync->in_flight));
     assert(sync->in_flight != NULL);
+    sync->present_done = (VkFence *)malloc(frame_count * sizeof(*sync->present_done));
+    assert(sync->present_done != NULL);
 
     VkSemaphoreCreateInfo sci = {0};
     sci.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -31,6 +33,7 @@ bool vk_sync_create(vk_sync_t *sync, const vk_device_t *device, uint32_t frame_c
         VK_CHECK(vkCreateSemaphore(device->logical, &sci, NULL, &sync->image_available[i]));
         VK_CHECK(vkCreateSemaphore(device->logical, &sci, NULL, &sync->render_finished[i]));
         VK_CHECK(vkCreateFence(device->logical, &fci, NULL, &sync->in_flight[i]));
+        VK_CHECK(vkCreateFence(device->logical, &fci, NULL, &sync->present_done[i]));
     }
 
     return true;
@@ -72,6 +75,18 @@ void vk_sync_destroy(vk_sync_t *sync, const vk_device_t *device) {
         free(sync->in_flight);
         sync->in_flight = NULL;
     }
+
+    if (sync->present_done != NULL) {
+        for (uint32_t i = 0; i < sync->count; ++i) {
+            if (sync->present_done[i] != VK_NULL_HANDLE) {
+                vkDestroyFence(device->logical, sync->present_done[i], NULL);
+                sync->present_done[i] = VK_NULL_HANDLE;
+            }
+        }
+        free(sync->present_done);
+        sync->present_done = NULL;
+    }
+
 
     memset(sync, 0, sizeof(*sync));
 }

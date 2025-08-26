@@ -23,6 +23,9 @@ vk_draw_result_t vk_draw_frame(const vk_device_t *device,
     VK_CHECK(vkWaitForFences(device->logical, 1, &sync->in_flight[*current_frame], VK_TRUE, UINT64_MAX));
     VK_CHECK(vkResetFences(device->logical, 1, &sync->in_flight[*current_frame]));
 
+    VK_CHECK(vkWaitForFences(device->logical, 1, &sync->present_done[*current_frame], VK_TRUE, UINT64_MAX));
+    VK_CHECK(vkResetFences(device->logical, 1, &sync->present_done[*current_frame]));
+
     uint32_t image_index = 0;
     VkResult res = vkAcquireNextImageKHR(device->logical,
                                          swapchain->handle,
@@ -56,8 +59,14 @@ vk_draw_result_t vk_draw_frame(const vk_device_t *device,
 
     VK_CHECK(vkQueueSubmit(device->graphics_queue, 1, &si, sync->in_flight[*current_frame]));
 
+    VkSwapchainPresentFenceInfoKHR spfi = {0};
+    spfi.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_PRESENT_FENCE_INFO_KHR;
+    spfi.swapchainCount = 1;
+    spfi.pFences = &sync->present_done[*current_frame];
+
     VkPresentInfoKHR pi = {0};
     pi.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+    pi.pNext = &spfi;
     pi.waitSemaphoreCount = 1;
     pi.pWaitSemaphores = &sync->render_finished[*current_frame];
     pi.swapchainCount = 1;

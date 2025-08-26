@@ -162,18 +162,36 @@ bool vk_device_create(vk_device_t *device, VkInstance instance, VkSurfaceKHR sur
     }
 
     const char *portability_ext = "VK_KHR_portability_subset";
-    const char *dev_exts[2];
+    const char *dev_exts[3];
     uint32_t dev_exts_count = 0;
-    dev_exts[dev_exts_count++] = VK_KHR_SWAPCHAIN_EXTENSION_NAME;
-    if (has_device_extension(best_device, portability_ext)) {
+
+    const char *swapchain_ext = VK_KHR_SWAPCHAIN_EXTENSION_NAME;
+    if (!has_device_extension(device->physical, swapchain_ext)) {
+        return false;
+    }
+    dev_exts[dev_exts_count++] = swapchain_ext;
+
+    const char *maintenance_ext = VK_EXT_SWAPCHAIN_MAINTENANCE_1_EXTENSION_NAME;
+    if (!has_device_extension(device->physical, maintenance_ext)) {
+        return false;
+    }
+    dev_exts[dev_exts_count++] = maintenance_ext;
+    VkPhysicalDeviceSwapchainMaintenance1FeaturesKHR pdsm1 = {0};
+    pdsm1.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SWAPCHAIN_MAINTENANCE_1_FEATURES_KHR;
+    pdsm1.swapchainMaintenance1 = VK_TRUE;
+
+    if (has_device_extension(device->physical, portability_ext)) {
         dev_exts[dev_exts_count++] = portability_ext;
     }
+
+
 
     VkPhysicalDeviceFeatures features = {0};
     vkGetPhysicalDeviceFeatures(device->physical, &features);
 
     VkDeviceCreateInfo dci = {0};
     dci.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+    dci.pNext = &pdsm1;
     dci.queueCreateInfoCount = dqci_count;
     dci.pQueueCreateInfos = dqci;
     dci.enabledExtensionCount = dev_exts_count;
