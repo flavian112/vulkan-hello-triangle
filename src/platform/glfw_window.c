@@ -16,8 +16,9 @@ struct platform_window {
 
 static void resize_framebuffer(GLFWwindow *handle, int width, int height) {
     platform_window_t *window = (platform_window_t *)glfwGetWindowUserPointer(handle);
-    assert(window != NULL);
-    window->framebuffer_resized = true;
+    if (window != NULL) {
+        window->framebuffer_resized = true;
+    }
 }
 
 static void log_glfw_error(int error_code, const char *description) {
@@ -45,7 +46,7 @@ bool platform_window_create(platform_window_t **window, uint32_t width, uint32_t
         return false;
     }
 
-    glfwSetWindowUserPointer(handle, window);
+    glfwSetWindowUserPointer(handle, *window);
     glfwSetFramebufferSizeCallback(handle, resize_framebuffer);
 
     *window = (platform_window_t *)malloc(sizeof(platform_window_t));

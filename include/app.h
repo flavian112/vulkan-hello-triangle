@@ -29,7 +29,7 @@ typedef struct {
     vk_commands_t commands;
     vk_sync_t sync;
 
-    uint32_t cur_frame;
+    uint32_t current_frame;
 } app_t;
 
 bool app_init(app_t *app);

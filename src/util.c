@@ -104,11 +104,3 @@ const char *vk_res_str(VkResult res) {
         return "unknown";
     }
 }
-
-uint32_t clamp_u32(uint32_t n, uint32_t min, uint32_t max) {
-    if (n < min)
-        return min;
-    if (n > max)
-        return max;
-    return n;
-}

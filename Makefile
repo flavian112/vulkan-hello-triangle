@@ -71,7 +71,7 @@ $(BUILDDIR)/%.o: $(SRCDIR)/%.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-run: $(OUT)
+run: $(OUT) $(SHADER_SPV)
 	"$(OUT)" $(RUN_ARGS)
 
 clean:

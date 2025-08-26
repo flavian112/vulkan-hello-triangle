@@ -17,4 +17,3 @@
 
 const char *vk_res_str(VkResult res);
 
-uint32_t clamp_u32(uint32_t n, uint32_t min, uint32_t max);

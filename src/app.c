@@ -35,39 +35,46 @@ bool app_init(app_t *app) {
     if (!platform_window_surface_create(app->window, app->instance.instance, &app->surface)) {
         log_error("APP Failed to create surface.");
         app_deinit(app);
+        return false;
     }
 
     if (!vk_device_create(&app->device, app->instance.instance, app->surface)) {
         log_error("APP Failed to create device.");
         app_deinit(app);
+        return false;
     }
 
     if (!vk_swapchain_create(&app->swapchain, &app->device, app->surface, app->window)) {
         log_error("APP Failed to create swapchain.");
         app_deinit(app);
+        return false;
     }
 
     if (!vk_renderpass_create(&app->renderpass, &app->device, &app->swapchain)) {
         log_error("APP Failed to create renderpass.");
         app_deinit(app);
+        return false;
     }
 
     if (!vk_pipeline_create(&app->pipeline, &app->device, &app->renderpass, "build/vert.spv", "build/frag.spv")) {
         log_error("APP Failed to create pipeline.");
         app_deinit(app);
+        return false;
     }
 
     if (!vk_commands_create(&app->commands, &app->device, MAX_FRAMES_IN_FLIGHT)) {
         log_error("APP Failed to create commands.");
         app_deinit(app);
+        return false;
     }
 
     if (!vk_sync_create(&app->sync, &app->device, MAX_FRAMES_IN_FLIGHT)) {
         log_error("APP Failed to create commands.");
         app_deinit(app);
+        return false;
     }
 
-    app->cur_frame = 0;
+    app->current_frame = 0;
 
     return true;
 }
@@ -81,7 +88,8 @@ void app_main_loop(app_t *app) {
                                                      &app->pipeline,
                                                      &app->commands,
                                                      &app->sync,
-                                                     &app->cur_frame);
+                                                     &app->current_frame);
+
         if (draw_result == VK_DRAW_NEED_RECREATE) {
             if (!vk_swapchain_recreate(&app->swapchain, &app->device, app->surface, app->window)) {
                 continue;
@@ -119,6 +127,7 @@ void app_deinit(app_t *app) {
 
     if (app->instance.instance != VK_NULL_HANDLE && app->surface != VK_NULL_HANDLE) {
         vkDestroySurfaceKHR(app->instance.instance, app->surface, NULL);
+        app->surface = VK_NULL_HANDLE;
     }
 
     vk_instance_destroy(&app->instance);
