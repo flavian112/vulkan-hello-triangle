@@ -1,11 +1,11 @@
 #pragma once
 
-#include "vk_device.h"
-
 #include <stdbool.h>
 #include <stdint.h>
 
 #include <vulkan/vulkan.h>
+
+#include "device.h"
 
 typedef struct {
     VkSemaphore *image_available;
@@ -13,8 +13,8 @@ typedef struct {
     VkFence *in_flight;
     VkFence *present_done;
     uint32_t count;
-} vk_sync_t;
+} sync_t;
 
-bool vk_sync_create(vk_sync_t *sync, const vk_device_t *device, uint32_t frame_count);
+bool sync_create(sync_t *sync, const device_t *device, uint32_t frame_count);
 
-void vk_sync_destroy(vk_sync_t *sync, const vk_device_t *device);
+void sync_destroy(sync_t *sync, const device_t *device);

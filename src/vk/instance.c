@@ -1,12 +1,12 @@
-#include "vk/vk_instance.h"
-
-#include "log.h"
-#include "platform_window.h"
-#include "util.h"
+#include "vk/instance.h"
 
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
+
+#include "log.h"
+#include "platform_window.h"
+#include "util.h"
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL debug_callback(VkDebugUtilsMessageSeverityFlagBitsEXT severity,
                                                      VkDebugUtilsMessageTypeFlagsEXT types,
@@ -83,7 +83,7 @@ static bool has_extension(const char *name) {
     return found;
 }
 
-bool vk_instance_create(vk_instance_t *instance) {
+bool instance_create(instance_t *instance) {
 
 #ifndef NDEBUG
     const bool validation_requested = true;
@@ -190,7 +190,7 @@ bool vk_instance_create(vk_instance_t *instance) {
     return true;
 }
 
-void vk_instance_destroy(vk_instance_t *instance) {
+void instance_destroy(instance_t *instance) {
     assert(instance != NULL);
 
     if (instance->debug_messenger != VK_NULL_HANDLE) {

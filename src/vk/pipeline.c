@@ -1,12 +1,12 @@
-#include "vk/vk_pipeline.h"
-
-#include "log.h"
-#include "util.h"
+#include "vk/pipeline.h"
 
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "log.h"
+#include "util.h"
 
 static void *read_file(const char *path, size_t *size) {
     assert(path != NULL);
@@ -56,11 +56,11 @@ static VkShaderModule create_shader_module(VkDevice device, const void *code, si
     return mod;
 }
 
-bool vk_pipeline_create(vk_pipeline_t *pipeline,
-                        const vk_device_t *device,
-                        const vk_renderpass_t *renderpass,
-                        const char *vert_spv_path,
-                        const char *frag_spv_path) {
+bool pipeline_create(pipeline_t *pipeline,
+                     const device_t *device,
+                     const renderpass_t *renderpass,
+                     const char *vert_spv_path,
+                     const char *frag_spv_path) {
     assert(pipeline != NULL);
     assert(device != NULL);
     assert(renderpass != NULL);
@@ -180,7 +180,7 @@ bool vk_pipeline_create(vk_pipeline_t *pipeline,
     return true;
 }
 
-void vk_pipeline_destroy(vk_pipeline_t *pipeline, const vk_device_t *device) {
+void pipeline_destroy(pipeline_t *pipeline, const device_t *device) {
     assert(pipeline != NULL);
     assert(device != NULL);
 

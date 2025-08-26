@@ -1,16 +1,17 @@
-#include "vk/vk_draw.h"
+#include "vk/draw.h"
+
+#include <assert.h>
 
 #include "log.h"
 #include "util.h"
-#include <assert.h>
 
-vk_draw_result_t vk_draw_frame(const vk_device_t *device,
-                               const vk_swapchain_t *swapchain,
-                               const vk_renderpass_t *renderpass,
-                               const vk_pipeline_t *pipeline,
-                               const vk_commands_t *commands,
-                               const vk_sync_t *sync,
-                               uint32_t *current_frame) {
+draw_result_t draw_frame(const device_t *device,
+                         const swapchain_t *swapchain,
+                         const renderpass_t *renderpass,
+                         const pipeline_t *pipeline,
+                         const commands_t *commands,
+                         const sync_t *sync,
+                         uint32_t *current_frame) {
     assert(device != NULL);
     assert(swapchain != NULL);
     assert(renderpass != NULL);
@@ -42,7 +43,7 @@ vk_draw_result_t vk_draw_frame(const vk_device_t *device,
     }
 
     VK_CHECK(vkResetCommandBuffer(commands->buffers[*current_frame], 0));
-    if (!vk_commands_record_frame(commands, device, renderpass, pipeline, swapchain, image_index, *current_frame)) {
+    if (!commands_record_frame(commands, device, renderpass, pipeline, swapchain, image_index, *current_frame)) {
         return VK_DRAW_ERROR;
     }
 

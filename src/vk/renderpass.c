@@ -1,13 +1,13 @@
-#include "vk/vk_renderpass.h"
-
-#include "log.h"
-#include "util.h"
+#include "vk/renderpass.h"
 
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
-static void destroy_framebuffers(vk_renderpass_t *renderpass, const vk_device_t *device) {
+#include "log.h"
+#include "util.h"
+
+static void destroy_framebuffers(renderpass_t *renderpass, const device_t *device) {
     assert(renderpass != NULL);
     assert(device != NULL);
 
@@ -23,8 +23,7 @@ static void destroy_framebuffers(vk_renderpass_t *renderpass, const vk_device_t 
     renderpass->framebuffer_count = 0;
 }
 
-static bool
-create_framebuffers(vk_renderpass_t *renderpass, const vk_device_t *device, const vk_swapchain_t *swapchain) {
+static bool create_framebuffers(renderpass_t *renderpass, const device_t *device, const swapchain_t *swapchain) {
     assert(renderpass != NULL);
     assert(device != NULL);
     assert(swapchain != NULL);
@@ -54,7 +53,7 @@ create_framebuffers(vk_renderpass_t *renderpass, const vk_device_t *device, cons
     return true;
 }
 
-bool vk_renderpass_create(vk_renderpass_t *renderpass, const vk_device_t *device, const vk_swapchain_t *swapchain) {
+bool renderpass_create(renderpass_t *renderpass, const device_t *device, const swapchain_t *swapchain) {
     assert(renderpass != NULL);
     assert(device != NULL);
     assert(swapchain != NULL);
@@ -109,7 +108,7 @@ bool vk_renderpass_create(vk_renderpass_t *renderpass, const vk_device_t *device
     return true;
 }
 
-void vk_renderpass_destroy(vk_renderpass_t *renderpass, const vk_device_t *device) {
+void renderpass_destroy(renderpass_t *renderpass, const device_t *device) {
     assert(renderpass != NULL);
     assert(device != NULL);
 
@@ -123,17 +122,19 @@ void vk_renderpass_destroy(vk_renderpass_t *renderpass, const vk_device_t *devic
     memset(renderpass, 0, sizeof(*renderpass));
 }
 
-bool vk_renderpass_recreate_framebuffers(vk_renderpass_t *renderpass,
-                                         const vk_device_t *device,
-                                         const vk_swapchain_t *swapchain) {
+bool renderpass_recreate_framebuffers(renderpass_t *renderpass, const device_t *device, const swapchain_t *swapchain) {
     assert(renderpass != NULL);
     assert(device != NULL);
     assert(swapchain != NULL);
     assert(renderpass->render_pass != VK_NULL_HANDLE);
 
-    if (vk_renderpass_format_mismatch(renderpass, swapchain)) {
+    if (renderpass_has_format_mismatch(renderpass, swapchain)) {
         return false;
     }
 
     return create_framebuffers(renderpass, device, swapchain);
+}
+
+bool renderpass_has_format_mismatch(const renderpass_t *renderpass, const swapchain_t *swapchain) {
+    return renderpass->render_pass != VK_NULL_HANDLE && renderpass->color_format != swapchain->image_format;
 }

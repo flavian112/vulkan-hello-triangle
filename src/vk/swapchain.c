@@ -1,11 +1,11 @@
-#include "vk/vk_swapchain.h"
-
-#include "log.h"
-#include "util.h"
+#include "vk/swapchain.h"
 
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "log.h"
+#include "util.h"
 
 typedef struct {
     VkSurfaceCapabilitiesKHR caps;
@@ -107,7 +107,7 @@ static VkExtent2D choose_extent(const swapchain_support_t *swapchain_support, co
     return extent;
 }
 
-static bool create_image_views(vk_swapchain_t *swapchain, const vk_device_t *device) {
+static bool create_image_views(swapchain_t *swapchain, const device_t *device) {
     assert(swapchain != NULL);
     assert(device != NULL);
 
@@ -135,8 +135,8 @@ static bool create_image_views(vk_swapchain_t *swapchain, const vk_device_t *dev
     return true;
 }
 
-static bool create_core(vk_swapchain_t *swapchain,
-                        const vk_device_t *device,
+static bool create_core(swapchain_t *swapchain,
+                        const device_t *device,
                         VkSurfaceKHR surface,
                         const platform_window_t *window,
                         VkSwapchainKHR old_swapchain) {
@@ -205,10 +205,10 @@ static bool create_core(vk_swapchain_t *swapchain,
     return res;
 }
 
-bool vk_swapchain_create(vk_swapchain_t *swapchain,
-                         const vk_device_t *device,
-                         VkSurfaceKHR surface,
-                         const platform_window_t *window) {
+bool swapchain_create(swapchain_t *swapchain,
+                      const device_t *device,
+                      VkSurfaceKHR surface,
+                      const platform_window_t *window) {
     assert(swapchain != NULL);
     assert(device != NULL);
     assert(surface != VK_NULL_HANDLE);
@@ -219,10 +219,10 @@ bool vk_swapchain_create(vk_swapchain_t *swapchain,
     return create_core(swapchain, device, surface, window, VK_NULL_HANDLE);
 }
 
-bool vk_swapchain_recreate(vk_swapchain_t *swapchain,
-                           const vk_device_t *device,
-                           VkSurfaceKHR surface,
-                           const platform_window_t *window) {
+bool swapchain_recreate(swapchain_t *swapchain,
+                        const device_t *device,
+                        VkSurfaceKHR surface,
+                        const platform_window_t *window) {
     assert(swapchain != NULL);
     assert(device != NULL);
     assert(surface != VK_NULL_HANDLE);
@@ -267,7 +267,7 @@ bool vk_swapchain_recreate(vk_swapchain_t *swapchain,
     return res;
 }
 
-void vk_swapchain_destroy(vk_swapchain_t *swapchain, const vk_device_t *device) {
+void swapchain_destroy(swapchain_t *swapchain, const device_t *device) {
     assert(swapchain != NULL);
     assert(device != NULL);
 

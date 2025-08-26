@@ -1,12 +1,12 @@
-#include "vk/vk_sync.h"
-
-#include "util.h"
+#include "vk/sync.h"
 
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
-bool vk_sync_create(vk_sync_t *sync, const vk_device_t *device, uint32_t frame_count) {
+#include "util.h"
+
+bool sync_create(sync_t *sync, const device_t *device, uint32_t frame_count) {
     assert(sync != NULL);
     assert(device != NULL);
 
@@ -39,7 +39,7 @@ bool vk_sync_create(vk_sync_t *sync, const vk_device_t *device, uint32_t frame_c
     return true;
 }
 
-void vk_sync_destroy(vk_sync_t *sync, const vk_device_t *device) {
+void sync_destroy(sync_t *sync, const device_t *device) {
     assert(sync != NULL);
     assert(device != NULL);
 

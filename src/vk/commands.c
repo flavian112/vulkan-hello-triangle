@@ -1,4 +1,4 @@
-#include "vk/vk_commands.h"
+#include "vk/commands.h"
 
 #include <assert.h>
 #include <stdlib.h>
@@ -6,7 +6,7 @@
 
 #include "util.h"
 
-bool vk_commands_create(vk_commands_t *commands, const vk_device_t *device, uint32_t frame_count) {
+bool commands_create(commands_t *commands, const device_t *device, uint32_t frame_count) {
     assert(commands != NULL);
     assert(device != NULL);
 
@@ -34,7 +34,7 @@ bool vk_commands_create(vk_commands_t *commands, const vk_device_t *device, uint
     return true;
 }
 
-void vk_commands_destroy(vk_commands_t *commands, const vk_device_t *device) {
+void commands_destroy(commands_t *commands, const device_t *device) {
     assert(commands != NULL);
     assert(device != NULL);
 
@@ -51,13 +51,13 @@ void vk_commands_destroy(vk_commands_t *commands, const vk_device_t *device) {
     memset(commands, 0, sizeof(*commands));
 }
 
-bool vk_commands_record_frame(const vk_commands_t *commands,
-                              const vk_device_t *device,
-                              const vk_renderpass_t *renderpass,
-                              const vk_pipeline_t *pipeline,
-                              const vk_swapchain_t *swapchain,
-                              uint32_t image_index,
-                              uint32_t frame_index) {
+bool commands_record_frame(const commands_t *commands,
+                           const device_t *device,
+                           const renderpass_t *renderpass,
+                           const pipeline_t *pipeline,
+                           const swapchain_t *swapchain,
+                           uint32_t image_index,
+                           uint32_t frame_index) {
     assert(commands != NULL);
     assert(device != NULL);
     assert(renderpass != NULL);

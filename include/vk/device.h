@@ -2,6 +2,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+
 #include <vulkan/vulkan.h>
 
 typedef struct {
@@ -14,8 +15,8 @@ typedef struct {
     bool has_present;
     VkQueue graphics_queue;
     VkQueue present_queue;
-} vk_device_t;
+} device_t;
 
-bool vk_device_create(vk_device_t *device, VkInstance instance, VkSurfaceKHR surface);
+bool device_create(device_t *device, VkInstance instance, VkSurfaceKHR surface);
 
-void vk_device_destroy(vk_device_t *device);
+void device_destroy(device_t *device);

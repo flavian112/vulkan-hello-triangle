@@ -1,12 +1,12 @@
-#include "vk/vk_device.h"
-
-#include "log.h"
-#include "util.h"
+#include "vk/device.h"
 
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "log.h"
+#include "util.h"
 
 typedef struct {
     uint32_t graphics_family;
@@ -110,7 +110,7 @@ static uint32_t score_device(VkPhysicalDevice device, VkSurfaceKHR surface) {
     return score;
 }
 
-bool vk_device_create(vk_device_t *device, VkInstance instance, VkSurfaceKHR surface) {
+bool device_create(device_t *device, VkInstance instance, VkSurfaceKHR surface) {
     assert(device != NULL);
     assert(instance != VK_NULL_HANDLE);
     assert(surface != VK_NULL_HANDLE);
@@ -209,7 +209,7 @@ bool vk_device_create(vk_device_t *device, VkInstance instance, VkSurfaceKHR sur
     return true;
 }
 
-void vk_device_destroy(vk_device_t *device) {
+void device_destroy(device_t *device) {
     assert(device != NULL);
 
     if (device->logical != NULL) {

@@ -6,28 +6,26 @@
 #include <vulkan/vulkan.h>
 
 #include "platform_window.h"
-#include "vk/vk_commands.h"
-#include "vk/vk_device.h"
-#include "vk/vk_instance.h"
-#include "vk/vk_pipeline.h"
-#include "vk/vk_renderpass.h"
-#include "vk/vk_swapchain.h"
-#include "vk/vk_sync.h"
-
-enum { MAX_FRAMES_IN_FLIGHT = 2 };
+#include "vk/commands.h"
+#include "vk/device.h"
+#include "vk/instance.h"
+#include "vk/pipeline.h"
+#include "vk/renderpass.h"
+#include "vk/swapchain.h"
+#include "vk/sync.h"
 
 typedef struct {
     platform_window_t *window;
 
-    vk_instance_t instance;
+    instance_t instance;
     VkSurfaceKHR surface;
-    vk_device_t device;
+    device_t device;
 
-    vk_swapchain_t swapchain;
-    vk_renderpass_t renderpass;
-    vk_pipeline_t pipeline;
-    vk_commands_t commands;
-    vk_sync_t sync;
+    swapchain_t swapchain;
+    renderpass_t renderpass;
+    pipeline_t pipeline;
+    commands_t commands;
+    sync_t sync;
 
     uint32_t current_frame;
 } app_t;
