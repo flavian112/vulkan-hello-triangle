@@ -1,0 +1,34 @@
+BasedOnStyle: LLVM
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+
+# Braces
+BreakBeforeBraces: Attach
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: False
+
+# Includes
+IncludeBlocks: Preserve
+
+# Function declaration/definition arguments
+BinPackArguments: false
+BinPackParameters: false
+AlignAfterOpenBracket: true
+AllowAllParametersOfDeclarationOnNextLine: false
+PenaltyBreakBeforeFirstCallParameter: 0
+
+# Control statements
+IndentCaseLabels: false
+AllowShortCaseLabelsOnASingleLine: false
+
+# Structs/records
+BraceWrapping:
+  AfterStruct: true
+  SplitEmptyRecord: false
+
+# Line breaking
+ColumnLimit: 120
+BreakConstructorInitializers: AfterColon
+
