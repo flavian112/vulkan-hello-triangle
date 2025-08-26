@@ -20,7 +20,6 @@ typedef struct {
     instance_t instance;
     VkSurfaceKHR surface;
     device_t device;
-
     swapchain_t swapchain;
     renderpass_t renderpass;
     pipeline_t pipeline;
@@ -30,6 +29,6 @@ typedef struct {
     uint32_t current_frame;
 } app_t;
 
-bool app_init(app_t *app);
-void app_main_loop(app_t *app);
-void app_deinit(app_t *app);
+bool app_create(app_t *app);
+void app_run(app_t *app);
+void app_destroy(app_t *app);
