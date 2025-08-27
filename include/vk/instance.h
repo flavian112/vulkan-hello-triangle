@@ -6,8 +6,8 @@
 #include <vulkan/vulkan.h>
 
 typedef struct {
-    VkInstance instance;
-    VkDebugUtilsMessengerEXT debug_messenger;
+    VkInstance vk_instance;
+    VkDebugUtilsMessengerEXT vk_debug_utils_messenger;
 } instance_t;
 
 bool instance_create(instance_t *instance);

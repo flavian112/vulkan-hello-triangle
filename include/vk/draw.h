@@ -11,7 +11,7 @@
 #include "swapchain.h"
 #include "sync.h"
 
-typedef enum { VK_DRAW_OK = 0, VK_DRAW_NEED_RECREATE, VK_DRAW_ERROR } draw_result_t;
+typedef enum { DRAW_SUCCESS = 0, DRAW_NEED_RECREATE, DRAW_ERROR } draw_result_t;
 
 draw_result_t draw_frame(const device_t *device,
                          const swapchain_t *swapchain,

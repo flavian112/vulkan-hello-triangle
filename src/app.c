@@ -33,13 +33,13 @@ bool app_create(app_t *app) {
         return false;
     }
 
-    if (!platform_window_surface_create(app->window, app->instance.instance, &app->surface)) {
+    if (!platform_window_surface_create(app->window, app->instance.vk_instance, &app->surface)) {
         log_error("APP Failed to create surface.");
         app_destroy(app);
         return false;
     }
 
-    if (!device_create(&app->device, app->instance.instance, app->surface)) {
+    if (!device_create(&app->device, app->instance.vk_instance, app->surface)) {
         log_error("APP Failed to create device.");
         app_destroy(app);
         return false;
@@ -91,7 +91,7 @@ void app_run(app_t *app) {
                                                &app->sync,
                                                &app->current_frame);
 
-        if (draw_result == VK_DRAW_NEED_RECREATE) {
+        if (draw_result == DRAW_NEED_RECREATE) {
             if (!swapchain_recreate(&app->swapchain, &app->device, app->surface, app->window)) {
                 continue;
             }
@@ -104,7 +104,7 @@ void app_run(app_t *app) {
             } else {
                 renderpass_recreate_framebuffers(&app->renderpass, &app->device, &app->swapchain);
             }
-        } else if (draw_result == VK_DRAW_ERROR) {
+        } else if (draw_result == DRAW_ERROR) {
             break;
         }
     }
@@ -125,8 +125,8 @@ void app_destroy(app_t *app) {
     renderpass_destroy(&app->renderpass, &app->device);
     device_destroy(&app->device);
 
-    if (app->instance.instance != VK_NULL_HANDLE && app->surface != VK_NULL_HANDLE) {
-        vkDestroySurfaceKHR(app->instance.instance, app->surface, NULL);
+    if (app->instance.vk_instance != VK_NULL_HANDLE && app->surface != VK_NULL_HANDLE) {
+        vkDestroySurfaceKHR(app->instance.vk_instance, app->surface, NULL);
         app->surface = VK_NULL_HANDLE;
     }
 

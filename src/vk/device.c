@@ -271,11 +271,8 @@ bool device_create(device_t *device, VkInstance vk_instance, VkSurfaceKHR vk_sur
 }
 
 void device_destroy(device_t *device) {
-    assert(device != NULL);
-
     if (device->vk_device != NULL) {
         vkDestroyDevice(device->vk_device, NULL);
-        device->vk_device = VK_NULL_HANDLE;
     }
 
     memset(device, 0, sizeof(*device));
