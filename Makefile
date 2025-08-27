@@ -64,7 +64,7 @@ all: $(OUT)
 $(OUT): $(OBJECTS) | $(BUILDDIR)
 	$(CC) $(LDFLAGS) -o $@ $(OBJECTS) $(LDLIBS)
 
-$(BUILDDIR)/%.o: $(SRCDIR)/%.c shaders | $(BUILDDIR)
+$(BUILDDIR)/%.o: $(SRCDIR)/%.c | shaders $(BUILDDIR)
 	mkdir -p $(@D)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 

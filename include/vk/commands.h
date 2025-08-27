@@ -11,9 +11,9 @@
 #include "swapchain.h"
 
 typedef struct {
-    VkCommandPool pool;
-    VkCommandBuffer *buffers;
-    uint32_t count;
+    VkCommandPool vk_pool;
+    VkCommandBuffer *vk_buffers;
+    uint32_t vk_buffers_count;
 } commands_t;
 
 bool commands_create(commands_t *commands, const device_t *device, uint32_t frame_count);

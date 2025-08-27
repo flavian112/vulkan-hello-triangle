@@ -22,14 +22,14 @@ draw_result_t draw_frame(const device_t *device,
 
     *current_frame %= sync->count;
 
-    VK_CHECK(vkWaitForFences(device->logical, 1, &sync->in_flight[*current_frame], VK_TRUE, UINT64_MAX));
-    VK_CHECK(vkResetFences(device->logical, 1, &sync->in_flight[*current_frame]));
+    VK_CHECK(vkWaitForFences(device->vk_device, 1, &sync->in_flight[*current_frame], VK_TRUE, UINT64_MAX));
+    VK_CHECK(vkResetFences(device->vk_device, 1, &sync->in_flight[*current_frame]));
 
-    VK_CHECK(vkWaitForFences(device->logical, 1, &sync->present_done[*current_frame], VK_TRUE, UINT64_MAX));
-    VK_CHECK(vkResetFences(device->logical, 1, &sync->present_done[*current_frame]));
+    VK_CHECK(vkWaitForFences(device->vk_device, 1, &sync->present_done[*current_frame], VK_TRUE, UINT64_MAX));
+    VK_CHECK(vkResetFences(device->vk_device, 1, &sync->present_done[*current_frame]));
 
     uint32_t image_index = 0;
-    VkResult res = vkAcquireNextImageKHR(device->logical,
+    VkResult res = vkAcquireNextImageKHR(device->vk_device,
                                          swapchain->handle,
                                          UINT64_MAX,
                                          sync->image_available[*current_frame],
@@ -43,7 +43,7 @@ draw_result_t draw_frame(const device_t *device,
         return VK_DRAW_ERROR;
     }
 
-    VK_CHECK(vkResetCommandBuffer(commands->buffers[*current_frame], 0));
+    VK_CHECK(vkResetCommandBuffer(commands->vk_buffers[*current_frame], 0));
     if (!commands_record_frame(commands, device, renderpass, pipeline, swapchain, image_index, *current_frame)) {
         return VK_DRAW_ERROR;
     }
@@ -55,7 +55,7 @@ draw_result_t draw_frame(const device_t *device,
     si.pWaitSemaphores = &sync->image_available[*current_frame];
     si.pWaitDstStageMask = &wait_stage;
     si.commandBufferCount = 1;
-    si.pCommandBuffers = &commands->buffers[*current_frame];
+    si.pCommandBuffers = &commands->vk_buffers[*current_frame];
     si.signalSemaphoreCount = 1;
     si.pSignalSemaphores = &sync->render_finished[*current_frame];
 

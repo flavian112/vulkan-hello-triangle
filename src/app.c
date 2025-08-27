@@ -108,14 +108,14 @@ void app_run(app_t *app) {
             break;
         }
     }
-    VK_CHECK(vkDeviceWaitIdle(app->device.logical));
+    VK_CHECK(vkDeviceWaitIdle(app->device.vk_device));
 }
 
 void app_destroy(app_t *app) {
     assert(app != NULL);
 
-    if (app->device.logical != VK_NULL_HANDLE) {
-        VK_CHECK(vkDeviceWaitIdle(app->device.logical));
+    if (app->device.vk_device != VK_NULL_HANDLE) {
+        VK_CHECK(vkDeviceWaitIdle(app->device.vk_device));
     }
 
     sync_destroy(&app->sync, &app->device);

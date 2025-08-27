@@ -31,11 +31,11 @@ bool pipeline_create(pipeline_t *pipeline, const device_t *device, const renderp
 
     uint32_t vsize = 0;
     const void *vdata = shader_get_vertex_spv_data(&vsize);
-    VkShaderModule vsm = create_shader_module(device->logical, vdata, vsize);
+    VkShaderModule vsm = create_shader_module(device->vk_device, vdata, vsize);
 
     uint32_t fsize = 0;
     const void *fdata = shader_get_fragment_spv_data(&fsize);
-    VkShaderModule fsm = create_shader_module(device->logical, fdata, fsize);
+    VkShaderModule fsm = create_shader_module(device->vk_device, fdata, fsize);
 
     VkPipelineShaderStageCreateInfo pssci[2];
     pssci[0] = (VkPipelineShaderStageCreateInfo){0};
@@ -99,7 +99,7 @@ bool pipeline_create(pipeline_t *pipeline, const device_t *device, const renderp
     VkPipelineLayoutCreateInfo plci = {0};
     plci.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 
-    VK_CHECK(vkCreatePipelineLayout(device->logical, &plci, NULL, &pipeline->layout));
+    VK_CHECK(vkCreatePipelineLayout(device->vk_device, &plci, NULL, &pipeline->layout));
 
     VkGraphicsPipelineCreateInfo gpci = {0};
     gpci.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -119,14 +119,14 @@ bool pipeline_create(pipeline_t *pipeline, const device_t *device, const renderp
     gpci.basePipelineHandle = VK_NULL_HANDLE;
     gpci.basePipelineIndex = -1;
 
-    VK_CHECK(vkCreateGraphicsPipelines(device->logical, VK_NULL_HANDLE, 1, &gpci, NULL, &pipeline->pipeline));
+    VK_CHECK(vkCreateGraphicsPipelines(device->vk_device, VK_NULL_HANDLE, 1, &gpci, NULL, &pipeline->pipeline));
 
     if (fsm != VK_NULL_HANDLE) {
-        vkDestroyShaderModule(device->logical, fsm, NULL);
+        vkDestroyShaderModule(device->vk_device, fsm, NULL);
     }
 
     if (vsm != VK_NULL_HANDLE) {
-        vkDestroyShaderModule(device->logical, vsm, NULL);
+        vkDestroyShaderModule(device->vk_device, vsm, NULL);
     }
 
     return true;
@@ -137,12 +137,12 @@ void pipeline_destroy(pipeline_t *pipeline, const device_t *device) {
     assert(device != NULL);
 
     if (pipeline->pipeline != VK_NULL_HANDLE) {
-        vkDestroyPipeline(device->logical, pipeline->pipeline, NULL);
+        vkDestroyPipeline(device->vk_device, pipeline->pipeline, NULL);
         pipeline->pipeline = VK_NULL_HANDLE;
     }
 
     if (pipeline->layout != VK_NULL_HANDLE) {
-        vkDestroyPipelineLayout(device->logical, pipeline->layout, NULL);
+        vkDestroyPipelineLayout(device->vk_device, pipeline->layout, NULL);
         pipeline->layout = VK_NULL_HANDLE;
     }
 

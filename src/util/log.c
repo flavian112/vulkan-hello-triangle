@@ -21,15 +21,15 @@ void log_message(log_level_t level, const char *file, int line, const char *func
 
     if (level == LOG_DEBUG) {
         out = stdout;
-        fprintf(out, "[%s] ", log_level_str(level));
-    } else {
-        fprintf(out, "[%s] %s:%d:%s(): ", log_level_str(level), file, line, func);
     }
+
+    fprintf(out, "[%s] ", log_level_str(level));
 
     va_list args;
     va_start(args, fmt);
     vfprintf(out, fmt, args);
     va_end(args);
+
     fputc('\n', out);
     fflush(out);
 }

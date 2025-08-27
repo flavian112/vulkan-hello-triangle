@@ -8,43 +8,7 @@
 #include "platform_window.h"
 #include "util/log.h"
 #include "util/util.h"
-
-static VKAPI_ATTR VkBool32 VKAPI_CALL debug_callback(VkDebugUtilsMessageSeverityFlagBitsEXT severity,
-                                                     VkDebugUtilsMessageTypeFlagsEXT types,
-                                                     const VkDebugUtilsMessengerCallbackDataEXT *cb,
-                                                     void *user_data) {
-    if (severity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) {
-        log_error("VULKAN Validation: %s", cb->pMessage);
-    } else if (severity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) {
-        log_warn("VULKAN Validation: %s", cb->pMessage);
-    } else {
-        // log_debug("VULKAN Validation %s", cb->pMessage);
-    }
-    return VK_FALSE;
-}
-
-static VkResult create_debug_utils_messenger(VkInstance inst,
-                                             const VkDebugUtilsMessengerCreateInfoEXT *ci,
-                                             const VkAllocationCallbacks *alloc,
-                                             VkDebugUtilsMessengerEXT *out) {
-    PFN_vkCreateDebugUtilsMessengerEXT fp =
-        (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(inst, "vkCreateDebugUtilsMessengerEXT");
-    if (fp == NULL) {
-        return VK_ERROR_EXTENSION_NOT_PRESENT;
-    }
-    return fp(inst, ci, alloc, out);
-}
-
-static void
-destroy_debug_utils_messenger(VkInstance inst, VkDebugUtilsMessengerEXT messenger, const VkAllocationCallbacks *alloc) {
-    PFN_vkDestroyDebugUtilsMessengerEXT fp =
-        (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(inst, "vkDestroyDebugUtilsMessengerEXT");
-    if (fp == NULL) {
-        return;
-    }
-
-    fp(inst, messenger, alloc);
-}
+#include "vk/debug.h"
 
 static bool has_layer(const char *name) {
     uint32_t count = 0;
@@ -167,14 +131,7 @@ bool instance_create(instance_t *instance) {
     ici.ppEnabledLayerNames = layers;
 
     VkDebugUtilsMessengerCreateInfoEXT dumci = {0};
-    dumci.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-    dumci.messageSeverity =
-        VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT |
-        VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT;
-    dumci.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT |
-                        VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT;
-    dumci.pfnUserCallback = debug_callback;
-
+    debug_utils_messenger_set_create_info(&dumci);
     if (has_debug_ext) {
         ici.pNext = &dumci;
     }
@@ -182,8 +139,7 @@ bool instance_create(instance_t *instance) {
     VK_CHECK(vkCreateInstance(&ici, NULL, &instance->instance));
 
     if (has_debug_ext) {
-        instance->debug_messenger = VK_NULL_HANDLE;
-        if (create_debug_utils_messenger(instance->instance, &dumci, NULL, &instance->debug_messenger) != VK_SUCCESS) {
+        if (!debug_utils_messenger_create(instance->instance, &dumci, &instance->debug_messenger)) {
             log_warn("VULKAN Failed to create debug messenger.");
         }
     }
@@ -195,7 +151,7 @@ void instance_destroy(instance_t *instance) {
     assert(instance != NULL);
 
     if (instance->debug_messenger != VK_NULL_HANDLE) {
-        destroy_debug_utils_messenger(instance->instance, instance->debug_messenger, NULL);
+        debug_utils_messenger_destroy(instance->instance, instance->debug_messenger);
         instance->debug_messenger = VK_NULL_HANDLE;
     }
     if (instance->instance != VK_NULL_HANDLE) {

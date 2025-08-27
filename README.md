@@ -2,18 +2,18 @@
 
 ## Resources
 
-- [Vulkan Homepage (vulkan.org)](https://vulkan.org)
-- [Vulkan Specification / Documentation (docs.vulkan.org)](https://docs.vulkan.org)
+[Vulkan Homepage](https://vulkan.org)<br>
+[Vulkan Specification / Documentation](https://docs.vulkan.org)<br>
 
 
-- [Khronos Vulkan Guide (docs.vulkan.org/guide)](https://docs.vulkan.org/guide)
-- [Khronos Vulkan Tutorial (docs.vulkan.org/tutorial)](https://docs.vulkan.org/tutorial)
-- [Khronos Vulkan Samples (github.com/KhronosGroup/Vulkan-Samples)](https://github.com/KhronosGroup/Vulkan-Samples)
-- [Vulkan Tutorial (vulkan-tutorial.com)](https://vulkan-tutorial.com)
-- [Vulkan Learn (vulkan.org/learn)](https://vulkan.org/learn)
+[Khronos Vulkan Guide](https://docs.vulkan.org/guide)<br>
+[Khronos Vulkan Tutorial](https://docs.vulkan.org/tutorial)<br>
+[Khronos Vulkan Samples](https://github.com/KhronosGroup/Vulkan-Samples)<br>
+[Vulkan Tutorial](https://vulkan-tutorial.com)<br>
+[Vulkan Learn](https://vulkan.org/learn)<br>
 
 
-- [glfw.org](https://www.glfw.org)
+[GLFW](https://www.glfw.org)<br>
 
 
 ## Dependencies

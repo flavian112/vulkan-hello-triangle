@@ -8,45 +8,55 @@
 #include "util/util.h"
 
 bool commands_create(commands_t *commands, const device_t *device, uint32_t frame_count) {
-    assert(commands != NULL);
-    assert(device != NULL);
-
     memset(commands, 0, sizeof(*commands));
 
-    VkCommandPoolCreateInfo cpci = {0};
-    cpci.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-    cpci.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-    cpci.queueFamilyIndex = device->graphics_family;
+    VkCommandPoolCreateInfo command_pool_create_info = {0};
+    command_pool_create_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+    command_pool_create_info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+    command_pool_create_info.queueFamilyIndex = device->graphics_queue_familiy_index;
 
-    VK_CHECK(vkCreateCommandPool(device->logical, &cpci, NULL, &commands->pool));
+    VkResult res;
+    res = vkCreateCommandPool(device->vk_device, &command_pool_create_info, NULL, &commands->vk_pool);
+    if (res != VK_SUCCESS) {
+        log_error("(COMMANDS) vkCreateCommandPool failed (%s).", vk_res_str(res));
+        commands->vk_pool = VK_NULL_HANDLE;
+        commands_destroy(commands, device);
+        return false;
+    }
 
-    commands->buffers = (VkCommandBuffer *)malloc(frame_count * sizeof(*commands->buffers));
-    assert(commands->buffers != NULL);
-    commands->count = frame_count;
+    if (frame_count > 0) {
+        commands->vk_buffers = (VkCommandBuffer *)malloc(frame_count * sizeof(*commands->vk_buffers));
+        if (commands->vk_buffers == NULL) {
+            log_error("(COMMANDS) malloc failed.");
+            commands_destroy(commands, device);
+            return false;
+        }
+        commands->vk_buffers_count = frame_count;
+    }
 
-    VkCommandBufferAllocateInfo cbai = {0};
-    cbai.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    cbai.commandPool = commands->pool;
-    cbai.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    cbai.commandBufferCount = frame_count;
+    VkCommandBufferAllocateInfo command_buffer_allocate_info = {0};
+    command_buffer_allocate_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    command_buffer_allocate_info.commandPool = commands->vk_pool;
+    command_buffer_allocate_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    command_buffer_allocate_info.commandBufferCount = frame_count;
 
-    VK_CHECK(vkAllocateCommandBuffers(device->logical, &cbai, commands->buffers));
+    res = vkAllocateCommandBuffers(device->vk_device, &command_buffer_allocate_info, commands->vk_buffers);
+    if (res != VK_SUCCESS) {
+        log_error("(COMMANDS) vkAllocateCommandBuffers failed (%s).", vk_res_str(res));
+        commands_destroy(commands, device);
+        return false;
+    }
 
     return true;
 }
 
 void commands_destroy(commands_t *commands, const device_t *device) {
-    assert(commands != NULL);
-    assert(device != NULL);
-
-    if (commands->pool != VK_NULL_HANDLE) {
-        vkDestroyCommandPool(device->logical, commands->pool, NULL);
-        commands->pool = VK_NULL_HANDLE;
+    if (commands->vk_pool != VK_NULL_HANDLE) {
+        vkDestroyCommandPool(device->vk_device, commands->vk_pool, NULL);
     }
 
-    if (commands->buffers != NULL) {
-        free(commands->buffers);
-        commands->buffers = NULL;
+    if (commands->vk_buffers != NULL) {
+        free(commands->vk_buffers);
     }
 
     memset(commands, 0, sizeof(*commands));
@@ -59,34 +69,35 @@ bool commands_record_frame(const commands_t *commands,
                            const swapchain_t *swapchain,
                            uint32_t image_index,
                            uint32_t frame_index) {
-    assert(commands != NULL);
-    assert(device != NULL);
-    assert(renderpass != NULL);
-    assert(pipeline != NULL);
-    assert(swapchain != NULL);
-    assert(frame_index < commands->count);
+    assert(frame_index < commands->vk_buffers_count);
 
-    VkCommandBuffer cmd = commands->buffers[frame_index];
+    VkCommandBuffer command_buffer = commands->vk_buffers[frame_index];
 
-    VkCommandBufferBeginInfo cbbi = {0};
-    cbbi.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    VkCommandBufferBeginInfo command_buffer_create_info = {0};
+    command_buffer_create_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
-    VK_CHECK(vkBeginCommandBuffer(cmd, &cbbi));
+    VkResult res;
+    res = vkBeginCommandBuffer(command_buffer, &command_buffer_create_info);
+    if (res != VK_SUCCESS) {
+        log_error("(COMMANDS) vkBeginCommandBuffer failed (%s).", vk_res_str(res));
+        return false;
+    }
 
-    VkClearValue clear = {0};
-    clear.color = (VkClearColorValue){{0.0F, 0.0F, 0.0F, 1.0F}};
+    VkClearValue clear_value = {0};
+    clear_value.color = (VkClearColorValue){{0.0F, 0.0F, 0.0F, 1.0F}};
 
-    VkRenderPassBeginInfo rpbi = {0};
-    rpbi.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    rpbi.renderPass = renderpass->render_pass;
-    rpbi.framebuffer = renderpass->framebuffers[image_index];
-    rpbi.renderArea.offset = (VkOffset2D){0, 0};
-    rpbi.renderArea.extent = swapchain->extent;
-    rpbi.clearValueCount = 1, rpbi.pClearValues = &clear;
+    VkRenderPassBeginInfo render_pass_begin_info = {0};
+    render_pass_begin_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    render_pass_begin_info.renderPass = renderpass->render_pass;
+    render_pass_begin_info.framebuffer = renderpass->framebuffers[image_index];
+    render_pass_begin_info.renderArea.offset = (VkOffset2D){0, 0};
+    render_pass_begin_info.renderArea.extent = swapchain->extent;
+    render_pass_begin_info.clearValueCount = 1;
+    render_pass_begin_info.pClearValues = &clear_value;
 
-    vkCmdBeginRenderPass(cmd, &rpbi, VK_SUBPASS_CONTENTS_INLINE);
+    vkCmdBeginRenderPass(command_buffer, &render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
 
-    vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->pipeline);
+    vkCmdBindPipeline(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->pipeline);
 
     VkViewport viewport = {0};
     viewport.x = 0.0F;
@@ -96,19 +107,23 @@ bool commands_record_frame(const commands_t *commands,
     viewport.minDepth = 0.0F;
     viewport.maxDepth = 1.0F;
 
-    vkCmdSetViewport(cmd, 0, 1, &viewport);
+    vkCmdSetViewport(command_buffer, 0, 1, &viewport);
 
     VkRect2D scissor = {0};
     scissor.offset = (VkOffset2D){0, 0};
     scissor.extent = swapchain->extent;
 
-    vkCmdSetScissor(cmd, 0, 1, &scissor);
+    vkCmdSetScissor(command_buffer, 0, 1, &scissor);
 
-    vkCmdDraw(cmd, 3, 1, 0, 0);
+    vkCmdDraw(command_buffer, 3, 1, 0, 0);
 
-    vkCmdEndRenderPass(cmd);
+    vkCmdEndRenderPass(command_buffer);
 
-    VK_CHECK(vkEndCommandBuffer(cmd));
+    res = vkEndCommandBuffer(command_buffer);
+    if (res != VK_SUCCESS) {
+        log_error("(COMMANDS) vkEndCommandBuffer failed (%s).", vk_res_str(res));
+        return false;
+    }
 
     return true;
 }

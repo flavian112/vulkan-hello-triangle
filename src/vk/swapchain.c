@@ -130,7 +130,7 @@ static bool create_image_views(swapchain_t *swapchain, const device_t *device) {
         ivci.subresourceRange.baseArrayLayer = 0;
         ivci.subresourceRange.layerCount = 1;
 
-        VK_CHECK(vkCreateImageView(device->logical, &ivci, NULL, &swapchain->image_views[i]));
+        VK_CHECK(vkCreateImageView(device->vk_device, &ivci, NULL, &swapchain->image_views[i]));
     }
     return true;
 }
@@ -146,7 +146,7 @@ static bool create_core(swapchain_t *swapchain,
     assert(window != NULL);
 
     swapchain_support_t swapchain_support;
-    if (!swapchain_support_query(device->physical, surface, &swapchain_support)) {
+    if (!swapchain_support_query(device->vk_physical_device, surface, &swapchain_support)) {
         log_error("VULKAN Failed to query swapchain support.");
         return false;
     }
@@ -180,8 +180,8 @@ static bool create_core(swapchain_t *swapchain,
     sci.clipped = VK_TRUE;
     sci.oldSwapchain = old_swapchain;
 
-    uint32_t queue_family[2] = {device->graphics_family, device->present_family};
-    if (device->graphics_family != device->present_family) {
+    uint32_t queue_family[2] = {device->graphics_queue_familiy_index, device->present_queue_family_index};
+    if (device->graphics_queue_familiy_index != device->present_queue_family_index) {
         sci.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
         sci.queueFamilyIndexCount = 2;
         sci.pQueueFamilyIndices = queue_family;
@@ -189,12 +189,12 @@ static bool create_core(swapchain_t *swapchain,
         sci.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
     }
 
-    VK_CHECK(vkCreateSwapchainKHR(device->logical, &sci, NULL, &swapchain->handle));
+    VK_CHECK(vkCreateSwapchainKHR(device->vk_device, &sci, NULL, &swapchain->handle));
 
-    VK_CHECK(vkGetSwapchainImagesKHR(device->logical, swapchain->handle, &image_count, NULL));
+    VK_CHECK(vkGetSwapchainImagesKHR(device->vk_device, swapchain->handle, &image_count, NULL));
     swapchain->images = (VkImage *)malloc(image_count * sizeof(*swapchain->images));
     assert(swapchain->images != NULL);
-    VK_CHECK(vkGetSwapchainImagesKHR(device->logical, swapchain->handle, &image_count, swapchain->images));
+    VK_CHECK(vkGetSwapchainImagesKHR(device->vk_device, swapchain->handle, &image_count, swapchain->images));
 
     swapchain->image_count = image_count;
     swapchain->image_format = format.format;
@@ -236,7 +236,7 @@ bool swapchain_recreate(swapchain_t *swapchain,
         platform_window_framebuffer_size(window, &width, &height);
     }
 
-    VK_CHECK(vkDeviceWaitIdle(device->logical));
+    VK_CHECK(vkDeviceWaitIdle(device->vk_device));
 
     VkSwapchainKHR old_handle = swapchain->handle;
     VkImageView *old_views = swapchain->image_views;
@@ -252,7 +252,7 @@ bool swapchain_recreate(swapchain_t *swapchain,
 
     if (old_views != NULL) {
         for (uint32_t i = 0; i < old_count; ++i) {
-            vkDestroyImageView(device->logical, old_views[i], NULL);
+            vkDestroyImageView(device->vk_device, old_views[i], NULL);
         }
         free(old_views);
     }
@@ -261,7 +261,7 @@ bool swapchain_recreate(swapchain_t *swapchain,
         free(old_images);
     }
     if (old_handle != VK_NULL_HANDLE) {
-        vkDestroySwapchainKHR(device->logical, old_handle, NULL);
+        vkDestroySwapchainKHR(device->vk_device, old_handle, NULL);
     }
 
     return res;
@@ -273,7 +273,7 @@ void swapchain_destroy(swapchain_t *swapchain, const device_t *device) {
 
     if (swapchain->image_views != NULL) {
         for (uint32_t i = 0; i < swapchain->image_count; ++i) {
-            vkDestroyImageView(device->logical, swapchain->image_views[i], NULL);
+            vkDestroyImageView(device->vk_device, swapchain->image_views[i], NULL);
         }
         free(swapchain->image_views);
         swapchain->image_views = NULL;
@@ -285,7 +285,7 @@ void swapchain_destroy(swapchain_t *swapchain, const device_t *device) {
     }
 
     if (swapchain->handle != VK_NULL_HANDLE) {
-        vkDestroySwapchainKHR(device->logical, swapchain->handle, NULL);
+        vkDestroySwapchainKHR(device->vk_device, swapchain->handle, NULL);
         swapchain->handle = VK_NULL_HANDLE;
     }
 

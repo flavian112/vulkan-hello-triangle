@@ -14,7 +14,7 @@ static void destroy_framebuffers(renderpass_t *renderpass, const device_t *devic
     if (renderpass->framebuffers != NULL) {
         for (uint32_t i = 0; i < renderpass->framebuffer_count; ++i) {
             if (renderpass->framebuffers[i]) {
-                vkDestroyFramebuffer(device->logical, renderpass->framebuffers[i], NULL);
+                vkDestroyFramebuffer(device->vk_device, renderpass->framebuffers[i], NULL);
             }
         }
         free(renderpass->framebuffers);
@@ -47,7 +47,7 @@ static bool create_framebuffers(renderpass_t *renderpass, const device_t *device
         fbci.height = swapchain->extent.height;
         fbci.layers = 1;
 
-        VK_CHECK(vkCreateFramebuffer(device->logical, &fbci, NULL, &renderpass->framebuffers[i]));
+        VK_CHECK(vkCreateFramebuffer(device->vk_device, &fbci, NULL, &renderpass->framebuffers[i]));
     }
 
     return true;
@@ -96,11 +96,11 @@ bool renderpass_create(renderpass_t *renderpass, const device_t *device, const s
     rpci.dependencyCount = 1;
     rpci.pDependencies = &subpass_dep;
 
-    VK_CHECK(vkCreateRenderPass(device->logical, &rpci, NULL, &renderpass->render_pass));
+    VK_CHECK(vkCreateRenderPass(device->vk_device, &rpci, NULL, &renderpass->render_pass));
     renderpass->color_format = swapchain->image_format;
 
     if (!create_framebuffers(renderpass, device, swapchain)) {
-        vkDestroyRenderPass(device->logical, renderpass->render_pass, NULL);
+        vkDestroyRenderPass(device->vk_device, renderpass->render_pass, NULL);
         memset(renderpass, 0, sizeof(*renderpass));
         return false;
     }
@@ -115,7 +115,7 @@ void renderpass_destroy(renderpass_t *renderpass, const device_t *device) {
     destroy_framebuffers(renderpass, device);
 
     if (renderpass->render_pass != VK_NULL_HANDLE) {
-        vkDestroyRenderPass(device->logical, renderpass->render_pass, NULL);
+        vkDestroyRenderPass(device->vk_device, renderpass->render_pass, NULL);
         renderpass->render_pass = VK_NULL_HANDLE;
     }
 

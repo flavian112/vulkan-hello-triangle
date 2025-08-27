@@ -31,10 +31,10 @@ bool sync_create(sync_t *sync, const device_t *device, uint32_t frame_count) {
     fci.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
     for (uint32_t i = 0; i < frame_count; ++i) {
-        VK_CHECK(vkCreateSemaphore(device->logical, &sci, NULL, &sync->image_available[i]));
-        VK_CHECK(vkCreateSemaphore(device->logical, &sci, NULL, &sync->render_finished[i]));
-        VK_CHECK(vkCreateFence(device->logical, &fci, NULL, &sync->in_flight[i]));
-        VK_CHECK(vkCreateFence(device->logical, &fci, NULL, &sync->present_done[i]));
+        VK_CHECK(vkCreateSemaphore(device->vk_device, &sci, NULL, &sync->image_available[i]));
+        VK_CHECK(vkCreateSemaphore(device->vk_device, &sci, NULL, &sync->render_finished[i]));
+        VK_CHECK(vkCreateFence(device->vk_device, &fci, NULL, &sync->in_flight[i]));
+        VK_CHECK(vkCreateFence(device->vk_device, &fci, NULL, &sync->present_done[i]));
     }
 
     return true;
@@ -47,7 +47,7 @@ void sync_destroy(sync_t *sync, const device_t *device) {
     if (sync->image_available != NULL) {
         for (uint32_t i = 0; i < sync->count; ++i) {
             if (sync->image_available[i] != VK_NULL_HANDLE) {
-                vkDestroySemaphore(device->logical, sync->image_available[i], NULL);
+                vkDestroySemaphore(device->vk_device, sync->image_available[i], NULL);
                 sync->image_available[i] = VK_NULL_HANDLE;
             }
         }
@@ -58,7 +58,7 @@ void sync_destroy(sync_t *sync, const device_t *device) {
     if (sync->render_finished != NULL) {
         for (uint32_t i = 0; i < sync->count; ++i) {
             if (sync->render_finished[i] != VK_NULL_HANDLE) {
-                vkDestroySemaphore(device->logical, sync->render_finished[i], NULL);
+                vkDestroySemaphore(device->vk_device, sync->render_finished[i], NULL);
                 sync->render_finished[i] = VK_NULL_HANDLE;
             }
         }
@@ -69,7 +69,7 @@ void sync_destroy(sync_t *sync, const device_t *device) {
     if (sync->in_flight != NULL) {
         for (uint32_t i = 0; i < sync->count; ++i) {
             if (sync->in_flight[i] != VK_NULL_HANDLE) {
-                vkDestroyFence(device->logical, sync->in_flight[i], NULL);
+                vkDestroyFence(device->vk_device, sync->in_flight[i], NULL);
                 sync->in_flight[i] = VK_NULL_HANDLE;
             }
         }
@@ -80,7 +80,7 @@ void sync_destroy(sync_t *sync, const device_t *device) {
     if (sync->present_done != NULL) {
         for (uint32_t i = 0; i < sync->count; ++i) {
             if (sync->present_done[i] != VK_NULL_HANDLE) {
-                vkDestroyFence(device->logical, sync->present_done[i], NULL);
+                vkDestroyFence(device->vk_device, sync->present_done[i], NULL);
                 sync->present_done[i] = VK_NULL_HANDLE;
             }
         }
