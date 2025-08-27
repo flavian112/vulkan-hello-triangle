@@ -5,8 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "log.h"
-#include "util.h"
+#include "util/log.h"
+#include "util/util.h"
 #include "vk/draw.h"
 
 const uint32_t MAX_FRAMES_IN_FLIGHT = 2;
@@ -57,7 +57,11 @@ bool app_create(app_t *app) {
         return false;
     }
 
-    if (!pipeline_create(&app->pipeline, &app->device, &app->renderpass, "build/vert.spv", "build/frag.spv")) {
+    if (!pipeline_create(&app->pipeline,
+                         &app->device,
+                         &app->renderpass,
+                         "build/shaders/shader.vert.spv",
+                         "build/shaders/shader.frag.spv")) {
         log_error("APP Failed to create pipeline.");
         app_destroy(app);
         return false;
@@ -100,7 +104,11 @@ void app_run(app_t *app) {
                 renderpass_destroy(&app->renderpass, &app->device);
                 pipeline_destroy(&app->pipeline, &app->device);
                 renderpass_create(&app->renderpass, &app->device, &app->swapchain);
-                pipeline_create(&app->pipeline, &app->device, &app->renderpass, "shaders/vert.spv", "shaders/frag.spv");
+                pipeline_create(&app->pipeline,
+                                &app->device,
+                                &app->renderpass,
+                                "build/shaders/shader.vert.spv",
+                                "build/shaders/shader.frag.spv");
             } else {
                 renderpass_recreate_framebuffers(&app->renderpass, &app->device, &app->swapchain);
             }

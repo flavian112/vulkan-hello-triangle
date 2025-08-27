@@ -5,43 +5,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "log.h"
-#include "util.h"
-
-static void *read_file(const char *path, size_t *size) {
-    assert(path != NULL);
-    assert(size != NULL);
-
-    FILE *file = fopen(path, "rb");
-    assert(file != NULL);
-
-    if (fseek(file, 0, SEEK_END) != 0) {
-        fclose(file);
-        return NULL;
-    }
-
-    long len = ftell(file);
-    if (len < 0) {
-        fclose(file);
-        return NULL;
-    }
-
-    if (fseek(file, 0, SEEK_SET) != 0) {
-        fclose(file);
-        return NULL;
-    }
-
-    void *data = malloc((size_t)len);
-    assert(data != NULL);
-
-    size_t n = fread(data, 1, (size_t)len, file);
-    fclose(file);
-    assert(n == (size_t)len);
-
-    *size = (size_t)len;
-
-    return data;
-}
+#include "util/log.h"
+#include "util/shader.h"
+#include "util/util.h"
 
 static VkShaderModule create_shader_module(VkDevice device, const void *code, size_t size) {
     VkShaderModuleCreateInfo smci = {0};
@@ -64,26 +30,19 @@ bool pipeline_create(pipeline_t *pipeline,
     assert(pipeline != NULL);
     assert(device != NULL);
     assert(renderpass != NULL);
-    assert(vert_spv_path != NULL);
-    assert(frag_spv_path != NULL);
 
     memset(pipeline, 0, sizeof(*pipeline));
-
-    size_t vsize = 0;
-    size_t fsize = 0;
-    void *vcode = read_file(vert_spv_path, &vsize);
-    assert(vcode != NULL);
-    void *fcode = read_file(frag_spv_path, &fsize);
-    assert(fcode != NULL);
 
     VkShaderModule vsm = VK_NULL_HANDLE;
     VkShaderModule fsm = VK_NULL_HANDLE;
 
-    vsm = create_shader_module(device->logical, vcode, vsize);
-    fsm = create_shader_module(device->logical, fcode, fsize);
+    uint32_t vsize = 0;
+    uint32_t fsize = 0;
+    const void *vdata = shader_get_vertex_spv_data(&vsize);
+    const void *fdata = shader_get_fragment_spv_data(&fsize);
 
-    free(vcode);
-    free(fcode);
+    vsm = create_shader_module(device->logical, vdata, vsize);
+    fsm = create_shader_module(device->logical, fdata, fsize);
 
     VkPipelineShaderStageCreateInfo pssci[2];
     pssci[0] = (VkPipelineShaderStageCreateInfo){0};

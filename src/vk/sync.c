@@ -4,7 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "util.h"
+#include "util/log.h"
+#include "util/util.h"
 
 bool sync_create(sync_t *sync, const device_t *device, uint32_t frame_count) {
     assert(sync != NULL);

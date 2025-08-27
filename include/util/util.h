@@ -1,10 +1,6 @@
 #pragma once
 
-#include <stdlib.h>
-
 #include <vulkan/vulkan.h>
-
-#include "log.h"
 
 #define VK_CHECK(x)                                                                                                    \
     do {                                                                                                               \

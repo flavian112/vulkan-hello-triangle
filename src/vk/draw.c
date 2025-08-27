@@ -1,9 +1,10 @@
 #include "vk/draw.h"
 
 #include <assert.h>
+#include <stdlib.h>
 
-#include "log.h"
-#include "util.h"
+#include "util/log.h"
+#include "util/util.h"
 
 draw_result_t draw_frame(const device_t *device,
                          const swapchain_t *swapchain,

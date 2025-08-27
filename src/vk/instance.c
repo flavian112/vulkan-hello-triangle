@@ -2,11 +2,12 @@
 
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
-#include "log.h"
 #include "platform_window.h"
-#include "util.h"
+#include "util/log.h"
+#include "util/util.h"
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL debug_callback(VkDebugUtilsMessageSeverityFlagBitsEXT severity,
                                                      VkDebugUtilsMessageTypeFlagsEXT types,

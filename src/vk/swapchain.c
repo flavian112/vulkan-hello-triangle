@@ -4,8 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "log.h"
-#include "util.h"
+#include "util/log.h"
+#include "util/util.h"
 
 typedef struct {
     VkSurfaceCapabilitiesKHR caps;

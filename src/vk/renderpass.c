@@ -4,8 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "log.h"
-#include "util.h"
+#include "util/log.h"
+#include "util/util.h"
 
 static void destroy_framebuffers(renderpass_t *renderpass, const device_t *device) {
     assert(renderpass != NULL);
