@@ -22,27 +22,20 @@ static VkShaderModule create_shader_module(VkDevice device, const void *code, si
     return mod;
 }
 
-bool pipeline_create(pipeline_t *pipeline,
-                     const device_t *device,
-                     const renderpass_t *renderpass,
-                     const char *vert_spv_path,
-                     const char *frag_spv_path) {
+bool pipeline_create(pipeline_t *pipeline, const device_t *device, const renderpass_t *renderpass) {
     assert(pipeline != NULL);
     assert(device != NULL);
     assert(renderpass != NULL);
 
     memset(pipeline, 0, sizeof(*pipeline));
 
-    VkShaderModule vsm = VK_NULL_HANDLE;
-    VkShaderModule fsm = VK_NULL_HANDLE;
-
     uint32_t vsize = 0;
-    uint32_t fsize = 0;
     const void *vdata = shader_get_vertex_spv_data(&vsize);
-    const void *fdata = shader_get_fragment_spv_data(&fsize);
+    VkShaderModule vsm = create_shader_module(device->logical, vdata, vsize);
 
-    vsm = create_shader_module(device->logical, vdata, vsize);
-    fsm = create_shader_module(device->logical, fdata, fsize);
+    uint32_t fsize = 0;
+    const void *fdata = shader_get_fragment_spv_data(&fsize);
+    VkShaderModule fsm = create_shader_module(device->logical, fdata, fsize);
 
     VkPipelineShaderStageCreateInfo pssci[2];
     pssci[0] = (VkPipelineShaderStageCreateInfo){0};

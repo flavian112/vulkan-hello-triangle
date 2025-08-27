@@ -24,13 +24,17 @@ const uint32_t shader_fragment_spv_size = sizeof(shader_fragment_spv_data);
 /* clang-format on */
 
 void *shader_get_vertex_spv_data(uint32_t *size) {
-    if (size != NULL)
+    if (size != NULL) {
         *size = shader_vertex_spv_size;
+    }
+
     return (void *)shader_vertex_spv_data;
 }
 
 void *shader_get_fragment_spv_data(uint32_t *size) {
-    if (size != NULL)
+    if (size != NULL) {
         *size = shader_fragment_spv_size;
+    }
+
     return (void *)shader_fragment_spv_data;
 }

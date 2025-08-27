@@ -57,11 +57,7 @@ bool app_create(app_t *app) {
         return false;
     }
 
-    if (!pipeline_create(&app->pipeline,
-                         &app->device,
-                         &app->renderpass,
-                         "build/shaders/shader.vert.spv",
-                         "build/shaders/shader.frag.spv")) {
+    if (!pipeline_create(&app->pipeline, &app->device, &app->renderpass)) {
         log_error("APP Failed to create pipeline.");
         app_destroy(app);
         return false;
@@ -104,11 +100,7 @@ void app_run(app_t *app) {
                 renderpass_destroy(&app->renderpass, &app->device);
                 pipeline_destroy(&app->pipeline, &app->device);
                 renderpass_create(&app->renderpass, &app->device, &app->swapchain);
-                pipeline_create(&app->pipeline,
-                                &app->device,
-                                &app->renderpass,
-                                "build/shaders/shader.vert.spv",
-                                "build/shaders/shader.frag.spv");
+                pipeline_create(&app->pipeline, &app->device, &app->renderpass);
             } else {
                 renderpass_recreate_framebuffers(&app->renderpass, &app->device, &app->swapchain);
             }
