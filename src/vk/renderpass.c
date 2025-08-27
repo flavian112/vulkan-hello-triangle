@@ -7,100 +7,107 @@
 #include "util/log.h"
 #include "util/util.h"
 
-static void destroy_framebuffers(renderpass_t *renderpass, const device_t *device) {
-    assert(renderpass != NULL);
-    assert(device != NULL);
-
-    if (renderpass->framebuffers != NULL) {
-        for (uint32_t i = 0; i < renderpass->framebuffer_count; ++i) {
-            if (renderpass->framebuffers[i]) {
-                vkDestroyFramebuffer(device->vk_device, renderpass->framebuffers[i], NULL);
+static void renderpass_destroy_framebuffers(renderpass_t *renderpass, const device_t *device) {
+    if (renderpass->vk_framebuffers != NULL) {
+        for (uint32_t i = 0; i < renderpass->vk_framebuffers_count; ++i) {
+            if (renderpass->vk_framebuffers[i]) {
+                vkDestroyFramebuffer(device->vk_device, renderpass->vk_framebuffers[i], NULL);
             }
         }
-        free(renderpass->framebuffers);
-        renderpass->framebuffers = NULL;
+        free(renderpass->vk_framebuffers);
+        renderpass->vk_framebuffers = NULL;
     }
-    renderpass->framebuffer_count = 0;
+    renderpass->vk_framebuffers_count = 0;
 }
 
-static bool create_framebuffers(renderpass_t *renderpass, const device_t *device, const swapchain_t *swapchain) {
-    assert(renderpass != NULL);
-    assert(device != NULL);
-    assert(swapchain != NULL);
+static bool
+renderpass_create_framebuffers(renderpass_t *renderpass, const device_t *device, const swapchain_t *swapchain) {
+    renderpass_destroy_framebuffers(renderpass, device);
 
-    destroy_framebuffers(renderpass, device);
+    renderpass->vk_framebuffers_count = swapchain->vk_image_count;
+    renderpass->vk_framebuffers =
+        (VkFramebuffer *)malloc(renderpass->vk_framebuffers_count * sizeof(*renderpass->vk_framebuffers));
+    if (renderpass->vk_framebuffers == NULL) {
+        log_error("(RENDERPASS) malloc failed.");
+        renderpass->vk_framebuffers_count = 0;
+        return false;
+    }
 
-    renderpass->framebuffer_count = swapchain->image_count;
-    renderpass->framebuffers =
-        (VkFramebuffer *)malloc(renderpass->framebuffer_count * sizeof(*renderpass->framebuffers));
-    assert(renderpass->framebuffers != NULL);
+    for (uint32_t i = 0; i < swapchain->vk_image_count; ++i) {
+        VkImageView image_view_attachments[] = {swapchain->vk_image_views[i]};
 
-    for (uint32_t i = 0; i < swapchain->image_count; ++i) {
-        VkImageView attachments[] = {swapchain->image_views[i]};
+        VkFramebufferCreateInfo framebuffer_create_info = {0};
+        framebuffer_create_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+        framebuffer_create_info.renderPass = renderpass->vk_render_pass;
+        framebuffer_create_info.attachmentCount = 1;
+        framebuffer_create_info.pAttachments = image_view_attachments;
+        framebuffer_create_info.width = swapchain->extent.width;
+        framebuffer_create_info.height = swapchain->extent.height;
+        framebuffer_create_info.layers = 1;
 
-        VkFramebufferCreateInfo fbci = {0};
-        fbci.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        fbci.renderPass = renderpass->render_pass;
-        fbci.attachmentCount = 1;
-        fbci.pAttachments = attachments;
-        fbci.width = swapchain->extent.width;
-        fbci.height = swapchain->extent.height;
-        fbci.layers = 1;
-
-        VK_CHECK(vkCreateFramebuffer(device->vk_device, &fbci, NULL, &renderpass->framebuffers[i]));
+        VkResult res;
+        res = vkCreateFramebuffer(device->vk_device, &framebuffer_create_info, NULL, &renderpass->vk_framebuffers[i]);
+        if (res != VK_SUCCESS) {
+            log_error("(RENDERPASS) vkCreateFramebuffer failed (%s).", vk_res_str(res));
+            renderpass_destroy_framebuffers(renderpass, device);
+            return false;
+        }
     }
 
     return true;
 }
 
 bool renderpass_create(renderpass_t *renderpass, const device_t *device, const swapchain_t *swapchain) {
-    assert(renderpass != NULL);
-    assert(device != NULL);
-    assert(swapchain != NULL);
-
     memset(renderpass, 0, sizeof(*renderpass));
 
-    VkAttachmentDescription attachment_desc = {0};
-    attachment_desc.format = swapchain->image_format;
-    attachment_desc.samples = VK_SAMPLE_COUNT_1_BIT;
-    attachment_desc.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-    attachment_desc.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-    attachment_desc.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    attachment_desc.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    attachment_desc.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    attachment_desc.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+    VkAttachmentDescription attachment_description = {0};
+    attachment_description.format = swapchain->vk_image_format;
+    attachment_description.samples = VK_SAMPLE_COUNT_1_BIT;
+    attachment_description.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    attachment_description.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    attachment_description.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    attachment_description.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    attachment_description.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    attachment_description.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
-    VkAttachmentReference attachment_ref = {0};
-    attachment_ref.attachment = 0;
-    attachment_ref.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    VkAttachmentReference attachment_reference = {0};
+    attachment_reference.attachment = 0;
+    attachment_reference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
-    VkSubpassDescription subpass_desc = {0};
-    subpass_desc.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-    subpass_desc.colorAttachmentCount = 1;
-    subpass_desc.pColorAttachments = &attachment_ref;
+    VkSubpassDescription subpass_description = {0};
+    subpass_description.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+    subpass_description.colorAttachmentCount = 1;
+    subpass_description.pColorAttachments = &attachment_reference;
 
-    VkSubpassDependency subpass_dep = {0};
-    subpass_dep.srcSubpass = VK_SUBPASS_EXTERNAL;
-    subpass_dep.dstSubpass = 0;
-    subpass_dep.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    subpass_dep.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    subpass_dep.srcAccessMask = 0;
-    subpass_dep.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+    VkSubpassDependency subpass_dependency = {0};
+    subpass_dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+    subpass_dependency.dstSubpass = 0;
+    subpass_dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    subpass_dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    subpass_dependency.srcAccessMask = 0;
+    subpass_dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 
-    VkRenderPassCreateInfo rpci = {0};
-    rpci.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-    rpci.attachmentCount = 1;
-    rpci.pAttachments = &attachment_desc;
-    rpci.subpassCount = 1;
-    rpci.pSubpasses = &subpass_desc;
-    rpci.dependencyCount = 1;
-    rpci.pDependencies = &subpass_dep;
+    VkRenderPassCreateInfo render_pass_create_info = {0};
+    render_pass_create_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+    render_pass_create_info.attachmentCount = 1;
+    render_pass_create_info.pAttachments = &attachment_description;
+    render_pass_create_info.subpassCount = 1;
+    render_pass_create_info.pSubpasses = &subpass_description;
+    render_pass_create_info.dependencyCount = 1;
+    render_pass_create_info.pDependencies = &subpass_dependency;
 
-    VK_CHECK(vkCreateRenderPass(device->vk_device, &rpci, NULL, &renderpass->render_pass));
-    renderpass->color_format = swapchain->image_format;
+    VkResult res;
+    res = vkCreateRenderPass(device->vk_device, &render_pass_create_info, NULL, &renderpass->vk_render_pass);
+    if (res != VK_SUCCESS) {
+        renderpass->vk_render_pass = VK_NULL_HANDLE;
+        log_error("(RENDERPASS) vkCreateRenderPass failed (%s).", vk_res_str(res));
+        return false;
+    }
 
-    if (!create_framebuffers(renderpass, device, swapchain)) {
-        vkDestroyRenderPass(device->vk_device, renderpass->render_pass, NULL);
+    renderpass->vk_color_format = swapchain->vk_image_format;
+
+    if (!renderpass_create_framebuffers(renderpass, device, swapchain)) {
+        vkDestroyRenderPass(device->vk_device, renderpass->vk_render_pass, NULL);
         memset(renderpass, 0, sizeof(*renderpass));
         return false;
     }
@@ -109,32 +116,23 @@ bool renderpass_create(renderpass_t *renderpass, const device_t *device, const s
 }
 
 void renderpass_destroy(renderpass_t *renderpass, const device_t *device) {
-    assert(renderpass != NULL);
-    assert(device != NULL);
+    renderpass_destroy_framebuffers(renderpass, device);
 
-    destroy_framebuffers(renderpass, device);
-
-    if (renderpass->render_pass != VK_NULL_HANDLE) {
-        vkDestroyRenderPass(device->vk_device, renderpass->render_pass, NULL);
-        renderpass->render_pass = VK_NULL_HANDLE;
+    if (renderpass->vk_render_pass != VK_NULL_HANDLE) {
+        vkDestroyRenderPass(device->vk_device, renderpass->vk_render_pass, NULL);
     }
 
     memset(renderpass, 0, sizeof(*renderpass));
 }
 
 bool renderpass_recreate_framebuffers(renderpass_t *renderpass, const device_t *device, const swapchain_t *swapchain) {
-    assert(renderpass != NULL);
-    assert(device != NULL);
-    assert(swapchain != NULL);
-    assert(renderpass->render_pass != VK_NULL_HANDLE);
-
     if (renderpass_has_format_mismatch(renderpass, swapchain)) {
         return false;
     }
 
-    return create_framebuffers(renderpass, device, swapchain);
+    return renderpass_create_framebuffers(renderpass, device, swapchain);
 }
 
 bool renderpass_has_format_mismatch(const renderpass_t *renderpass, const swapchain_t *swapchain) {
-    return renderpass->render_pass != VK_NULL_HANDLE && renderpass->color_format != swapchain->image_format;
+    return renderpass->vk_render_pass != VK_NULL_HANDLE && renderpass->vk_color_format != swapchain->vk_image_format;
 }

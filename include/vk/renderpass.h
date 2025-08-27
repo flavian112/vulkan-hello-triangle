@@ -9,12 +9,12 @@
 #include "swapchain.h"
 
 typedef struct {
-    VkRenderPass render_pass;
+    VkRenderPass vk_render_pass;
 
-    VkFramebuffer *framebuffers;
-    uint32_t framebuffer_count;
+    VkFramebuffer *vk_framebuffers;
+    uint32_t vk_framebuffers_count;
 
-    VkFormat color_format;
+    VkFormat vk_color_format;
 } renderpass_t;
 
 bool renderpass_create(renderpass_t *renderpass, const device_t *device, const swapchain_t *swapchain);

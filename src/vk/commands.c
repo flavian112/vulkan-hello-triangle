@@ -88,8 +88,8 @@ bool commands_record_frame(const commands_t *commands,
 
     VkRenderPassBeginInfo render_pass_begin_info = {0};
     render_pass_begin_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    render_pass_begin_info.renderPass = renderpass->render_pass;
-    render_pass_begin_info.framebuffer = renderpass->framebuffers[image_index];
+    render_pass_begin_info.renderPass = renderpass->vk_render_pass;
+    render_pass_begin_info.framebuffer = renderpass->vk_framebuffers[image_index];
     render_pass_begin_info.renderArea.offset = (VkOffset2D){0, 0};
     render_pass_begin_info.renderArea.extent = swapchain->extent;
     render_pass_begin_info.clearValueCount = 1;
@@ -97,7 +97,7 @@ bool commands_record_frame(const commands_t *commands,
 
     vkCmdBeginRenderPass(command_buffer, &render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
 
-    vkCmdBindPipeline(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->pipeline);
+    vkCmdBindPipeline(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->vk_pipeline);
 
     VkViewport viewport = {0};
     viewport.x = 0.0F;

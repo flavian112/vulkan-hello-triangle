@@ -9,8 +9,8 @@
 #include "renderpass.h"
 
 typedef struct {
-    VkPipelineLayout layout;
-    VkPipeline pipeline;
+    VkPipelineLayout vk_pipeline_layout;
+    VkPipeline vk_pipeline;
 } pipeline_t;
 
 bool pipeline_create(pipeline_t *pipeline, const device_t *device, const renderpass_t *renderpass);
