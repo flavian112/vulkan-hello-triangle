@@ -7,7 +7,7 @@
 
 #include "util/log.h"
 #include "util/shader.h"
-#include "util/util.h"
+#include "vk/debug.h"
 
 static VkShaderModule pipeline_create_shader_module(VkDevice vk_device, const void *code, size_t size) {
     VkShaderModuleCreateInfo shader_module_create_info = {0};
@@ -156,6 +156,10 @@ bool pipeline_create(pipeline_t *pipeline, const device_t *device, const renderp
 }
 
 void pipeline_destroy(pipeline_t *pipeline, const device_t *device) {
+    if (pipeline == NULL) {
+        return;
+    }
+
     if (pipeline->vk_pipeline != VK_NULL_HANDLE) {
         vkDestroyPipeline(device->vk_device, pipeline->vk_pipeline, NULL);
     }

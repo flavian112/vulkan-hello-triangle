@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 #include "util/log.h"
-#include "util/util.h"
+#include "vk/debug.h"
 
 #include <vulkan/vulkan.h>
 
@@ -36,9 +36,6 @@ void platform_deinit(void) {
 }
 
 bool platform_window_create(platform_window_t **window, uint32_t width, uint32_t height, const char *title) {
-    assert(window != NULL);
-    assert(title != NULL);
-
     *window = NULL;
 
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -51,7 +48,10 @@ bool platform_window_create(platform_window_t **window, uint32_t width, uint32_t
     glfwSetFramebufferSizeCallback(handle, resize_framebuffer);
 
     *window = (platform_window_t *)malloc(sizeof(platform_window_t));
-    assert(*window != NULL);
+    if (*window == NULL) {
+        glfwDestroyWindow(handle);
+        return false;
+    }
 
     (*window)->handle = handle;
     (*window)->framebuffer_resized = false;
@@ -60,9 +60,6 @@ bool platform_window_create(platform_window_t **window, uint32_t width, uint32_t
 }
 
 void platform_window_destroy(platform_window_t *window) {
-    assert(window != NULL);
-    assert(window->handle != NULL);
-
     glfwDestroyWindow(window->handle);
     window->handle = NULL;
     free(window);
@@ -77,29 +74,21 @@ void platform_window_wait(const platform_window_t *window) {
 }
 
 bool platform_window_should_close(const platform_window_t *window) {
-    assert(window != NULL);
-    assert(window->handle != NULL);
-
     return glfwWindowShouldClose(window->handle) == GLFW_TRUE;
 }
 
 bool platform_window_surface_create(const platform_window_t *window, VkInstance instance, VkSurfaceKHR *surface) {
-    assert(window != NULL);
-    assert(window->handle != NULL);
-    assert(instance != VK_NULL_HANDLE);
-    assert(surface != NULL);
-
-    VK_CHECK(glfwCreateWindowSurface(instance, window->handle, NULL, surface));
+    VkResult res;
+    res = glfwCreateWindowSurface(instance, window->handle, NULL, surface);
+    if (res != VK_SUCCESS) {
+        log_error("(GLFW_WINDOW) glfwCreateWindowSurface failed (%s).", vk_res_str(res));
+        return false;
+    }
 
     return true;
 }
 
 void platform_window_framebuffer_size(const platform_window_t *window, uint32_t *width, uint32_t *height) {
-    assert(window != NULL);
-    assert(window->handle != NULL);
-    assert(width != NULL);
-    assert(height != NULL);
-
     glfwGetFramebufferSize(window->handle, (int *)width, (int *)height);
 }
 

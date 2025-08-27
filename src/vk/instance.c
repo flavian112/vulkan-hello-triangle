@@ -7,7 +7,6 @@
 
 #include "platform_window.h"
 #include "util/log.h"
-#include "util/util.h"
 #include "vk/debug.h"
 
 #ifndef NDEBUG
@@ -203,6 +202,9 @@ bool instance_create(instance_t *instance) {
 }
 
 void instance_destroy(instance_t *instance) {
+    if (instance == NULL) {
+        return;
+    }
 
     if (instance->vk_debug_utils_messenger != VK_NULL_HANDLE) {
         debug_utils_messenger_destroy(instance->vk_instance, instance->vk_debug_utils_messenger);

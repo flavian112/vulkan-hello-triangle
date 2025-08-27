@@ -5,7 +5,7 @@
 #include <string.h>
 
 #include "util/log.h"
-#include "util/util.h"
+#include "vk/debug.h"
 
 bool commands_create(commands_t *commands, const device_t *device, uint32_t frame_count) {
     memset(commands, 0, sizeof(*commands));
@@ -51,6 +51,10 @@ bool commands_create(commands_t *commands, const device_t *device, uint32_t fram
 }
 
 void commands_destroy(commands_t *commands, const device_t *device) {
+    if (commands == NULL) {
+        return;
+    }
+
     if (commands->vk_pool != VK_NULL_HANDLE) {
         vkDestroyCommandPool(device->vk_device, commands->vk_pool, NULL);
     }

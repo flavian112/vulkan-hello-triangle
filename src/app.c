@@ -6,7 +6,7 @@
 #include <string.h>
 
 #include "util/log.h"
-#include "util/util.h"
+#include "vk/debug.h"
 #include "vk/draw.h"
 
 const uint32_t MAX_FRAMES_IN_FLIGHT = 2;
@@ -83,6 +83,7 @@ bool app_create(app_t *app) {
 void app_run(app_t *app) {
     while (!platform_window_should_close(app->window)) {
         platform_window_poll(app->window);
+
         draw_result_t draw_result = draw_frame(&app->device,
                                                &app->swapchain,
                                                &app->renderpass,
@@ -99,23 +100,42 @@ void app_run(app_t *app) {
             if (renderpass_has_format_mismatch(&app->renderpass, &app->swapchain)) {
                 renderpass_destroy(&app->renderpass, &app->device);
                 pipeline_destroy(&app->pipeline, &app->device);
-                renderpass_create(&app->renderpass, &app->device, &app->swapchain);
-                pipeline_create(&app->pipeline, &app->device, &app->renderpass);
+
+                if (renderpass_create(&app->renderpass, &app->device, &app->swapchain)) {
+                    break;
+                }
+
+                if (!pipeline_create(&app->pipeline, &app->device, &app->renderpass)) {
+                    break;
+                }
             } else {
-                renderpass_recreate_framebuffers(&app->renderpass, &app->device, &app->swapchain);
+                if (!renderpass_recreate_framebuffers(&app->renderpass, &app->device, &app->swapchain)) {
+                    break;
+                }
             }
         } else if (draw_result == DRAW_ERROR) {
             break;
         }
     }
-    VK_CHECK(vkDeviceWaitIdle(app->device.vk_device));
+
+    VkResult res;
+    res = vkDeviceWaitIdle(app->device.vk_device);
+    if (res != VK_SUCCESS) {
+        log_error("(APP) vkDeviceWaitIdle failed (%s).", vk_res_str(res));
+    }
 }
 
 void app_destroy(app_t *app) {
-    assert(app != NULL);
+    if (app == NULL) {
+        return;
+    }
 
     if (app->device.vk_device != VK_NULL_HANDLE) {
-        VK_CHECK(vkDeviceWaitIdle(app->device.vk_device));
+        VkResult res;
+        res = vkDeviceWaitIdle(app->device.vk_device);
+        if (res != VK_SUCCESS) {
+            log_error("(APP) vkDeviceWaitIdle failed (%s).", vk_res_str(res));
+        }
     }
 
     sync_destroy(&app->sync, &app->device);

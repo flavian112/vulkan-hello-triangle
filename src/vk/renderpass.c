@@ -5,7 +5,7 @@
 #include <string.h>
 
 #include "util/log.h"
-#include "util/util.h"
+#include "vk/debug.h"
 
 static void renderpass_destroy_framebuffers(renderpass_t *renderpass, const device_t *device) {
     if (renderpass->vk_framebuffers != NULL) {
@@ -116,6 +116,10 @@ bool renderpass_create(renderpass_t *renderpass, const device_t *device, const s
 }
 
 void renderpass_destroy(renderpass_t *renderpass, const device_t *device) {
+    if (renderpass == NULL) {
+        return;
+    }
+
     renderpass_destroy_framebuffers(renderpass, device);
 
     if (renderpass->vk_render_pass != VK_NULL_HANDLE) {

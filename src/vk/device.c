@@ -6,7 +6,7 @@
 #include <string.h>
 
 #include "util/log.h"
-#include "util/util.h"
+#include "vk/debug.h"
 
 typedef struct {
     uint32_t graphics_queue_family_index;
@@ -271,6 +271,10 @@ bool device_create(device_t *device, VkInstance vk_instance, VkSurfaceKHR vk_sur
 }
 
 void device_destroy(device_t *device) {
+    if (device == NULL) {
+        return;
+    }
+
     if (device->vk_device != NULL) {
         vkDestroyDevice(device->vk_device, NULL);
     }

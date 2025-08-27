@@ -5,7 +5,7 @@
 #include <string.h>
 
 #include "util/log.h"
-#include "util/util.h"
+#include "vk/debug.h"
 
 bool sync_create(sync_t *sync, const device_t *device, uint32_t frame_count) {
     memset(sync, 0, sizeof(*sync));
@@ -83,6 +83,9 @@ bool sync_create(sync_t *sync, const device_t *device, uint32_t frame_count) {
 }
 
 void sync_destroy(sync_t *sync, const device_t *device) {
+    if (sync == NULL) {
+        return;
+    }
 
     if (sync->vk_semaphore_image_available != NULL) {
         for (uint32_t i = 0; i < sync->frame_count; ++i) {

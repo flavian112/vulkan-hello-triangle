@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 #include "util/log.h"
-#include "util/util.h"
+#include "vk/debug.h"
 
 draw_result_t draw_frame(const device_t *device,
                          const swapchain_t *swapchain,
