@@ -17,14 +17,14 @@
 typedef struct {
     platform_window_t *window;
 
-    instance_t instance;
+    instance_t   instance;
     VkSurfaceKHR surface;
-    device_t device;
-    swapchain_t swapchain;
+    device_t     device;
+    swapchain_t  swapchain;
     renderpass_t renderpass;
-    pipeline_t pipeline;
-    commands_t commands;
-    sync_t sync;
+    pipeline_t   pipeline;
+    commands_t   commands;
+    sync_t       sync;
 
     uint32_t current_frame;
 } app_t;

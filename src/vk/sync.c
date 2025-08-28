@@ -11,15 +11,15 @@ bool sync_create(sync_t *sync, const device_t *device, uint32_t frame_count) {
     memset(sync, 0, sizeof(*sync));
 
     sync->frame_count = frame_count;
-    sync->vk_semaphore_image_available =
-        (VkSemaphore *)malloc(frame_count * sizeof(*sync->vk_semaphore_image_available));
+    sync->vk_semaphore_image_available
+        = (VkSemaphore *)malloc(frame_count * sizeof(*sync->vk_semaphore_image_available));
     if (sync->vk_semaphore_image_available == NULL) {
         log_error("(SYNC) malloc failed.");
         sync_destroy(sync, device);
         return false;
     }
-    sync->vk_semaphore_render_finished =
-        (VkSemaphore *)malloc(frame_count * sizeof(*sync->vk_semaphore_render_finished));
+    sync->vk_semaphore_render_finished
+        = (VkSemaphore *)malloc(frame_count * sizeof(*sync->vk_semaphore_render_finished));
     if (sync->vk_semaphore_render_finished == NULL) {
         log_error("(SYNC) malloc failed.");
         sync_destroy(sync, device);
@@ -31,7 +31,8 @@ bool sync_create(sync_t *sync, const device_t *device, uint32_t frame_count) {
         sync_destroy(sync, device);
         return false;
     }
-    sync->vk_fence_present_done = (VkFence *)malloc(frame_count * sizeof(*sync->vk_fence_present_done));
+    sync->vk_fence_present_done
+        = (VkFence *)malloc(frame_count * sizeof(*sync->vk_fence_present_done));
     if (sync->vk_fence_present_done == NULL) {
         log_error("(SYNC) malloc failed.");
         sync_destroy(sync, device);
@@ -39,38 +40,44 @@ bool sync_create(sync_t *sync, const device_t *device, uint32_t frame_count) {
     }
 
     VkSemaphoreCreateInfo semaphore_create_info = {0};
-    semaphore_create_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+    semaphore_create_info.sType                 = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
     VkFenceCreateInfo fence_create_info = {0};
-    fence_create_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-    fence_create_info.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+    fence_create_info.sType             = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+    fence_create_info.flags             = VK_FENCE_CREATE_SIGNALED_BIT;
 
     for (uint32_t i = 0; i < frame_count; ++i) {
         VkResult res;
-        res =
-            vkCreateSemaphore(device->vk_device, &semaphore_create_info, NULL, &sync->vk_semaphore_image_available[i]);
+        res = vkCreateSemaphore(
+            device->vk_device, &semaphore_create_info, NULL, &sync->vk_semaphore_image_available[i]
+        );
         if (res != VK_SUCCESS) {
             log_error("(SYNC) vkCreateSemaphore failed (%s).", vk_res_str(res));
             sync->vk_semaphore_image_available = VK_NULL_HANDLE;
             sync_destroy(sync, device);
             return false;
         }
-        res =
-            vkCreateSemaphore(device->vk_device, &semaphore_create_info, NULL, &sync->vk_semaphore_render_finished[i]);
+        res = vkCreateSemaphore(
+            device->vk_device, &semaphore_create_info, NULL, &sync->vk_semaphore_render_finished[i]
+        );
         if (res != VK_SUCCESS) {
             log_error("(SYNC) vkCreateSemaphore failed (%s).", vk_res_str(res));
             sync->vk_semaphore_render_finished = VK_NULL_HANDLE;
             sync_destroy(sync, device);
             return false;
         }
-        res = vkCreateFence(device->vk_device, &fence_create_info, NULL, &sync->vk_fence_in_flight[i]);
+        res = vkCreateFence(
+            device->vk_device, &fence_create_info, NULL, &sync->vk_fence_in_flight[i]
+        );
         if (res != VK_SUCCESS) {
             log_error("(SYNC) vkCreateFence failed (%s).", vk_res_str(res));
             sync->vk_fence_in_flight = VK_NULL_HANDLE;
             sync_destroy(sync, device);
             return false;
         }
-        res = vkCreateFence(device->vk_device, &fence_create_info, NULL, &sync->vk_fence_present_done[i]);
+        res = vkCreateFence(
+            device->vk_device, &fence_create_info, NULL, &sync->vk_fence_present_done[i]
+        );
         if (res != VK_SUCCESS) {
             log_error("(SYNC) vkCreateFence failed (%s).", vk_res_str(res));
             sync->vk_fence_present_done = VK_NULL_HANDLE;

@@ -16,7 +16,14 @@ static const char *log_level_str(log_level_t level) {
     }
 }
 
-void log_message(log_level_t level, const char *file, int line, const char *func, const char *fmt, ...) {
+void log_message(
+    log_level_t level,
+    const char *file,
+    int         line,
+    const char *func,
+    const char *fmt,
+    ...
+) {
     FILE *out = stderr;
 
     if (level == LOG_DEBUG) {

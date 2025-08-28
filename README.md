@@ -16,6 +16,10 @@
 [GLFW](https://www.glfw.org)<br>
 
 
+[Learning Modern 3D Graphics Programming](https://paroj.github.io/gltut)
+[Raytracing in one Weekend](https://raytracing.github.io)
+
+
 ## Dependencies
 
 

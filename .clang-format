@@ -1,34 +1,57 @@
 BasedOnStyle: LLVM
-IndentWidth: 4
-TabWidth: 4
-UseTab: Never
-
-# Braces
-BreakBeforeBraces: Attach
-AllowShortFunctionsOnASingleLine: Empty
-AllowShortIfStatementsOnASingleLine: Never
-AllowShortLoopsOnASingleLine: False
-
-# Includes
-IncludeBlocks: Preserve
-
-# Function declaration/definition arguments
+AlignAfterOpenBracket: BlockIndent
+AlignArrayOfStructures: Left
+AlignConsecutiveAssignments:
+  Enabled: true
+AlignConsecutiveDeclarations:
+  Enabled: true
+AlignEscapedNewlines: LeftWithLastLine
+AlignOperands: AlignAfterOperator
+AllowAllParametersOfDeclarationOnNextLine: false
+AllowShortEnumsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
+AlwaysBreakBeforeMultilineStrings: true
 BinPackArguments: false
 BinPackParameters: false
-AlignAfterOpenBracket: true
-AllowAllParametersOfDeclarationOnNextLine: false
-PenaltyBreakBeforeFirstCallParameter: 0
-
-# Control statements
-IndentCaseLabels: false
-AllowShortCaseLabelsOnASingleLine: false
-
-# Structs/records
 BraceWrapping:
-  AfterStruct: true
-  SplitEmptyRecord: false
-
-# Line breaking
-ColumnLimit: 120
-BreakConstructorInitializers: AfterColon
-
+  AfterCaseLabel: false
+  AfterClass: false
+  AfterControlStatement: Never
+  AfterEnum: false
+  AfterFunction: false
+  AfterNamespace: false
+  AfterObjCDeclaration: false
+  AfterStruct: false
+  AfterUnion: false
+  AfterExternBlock: false
+  BeforeCatch: false
+  BeforeElse: false
+  BeforeLambdaBody: false
+  BeforeWhile: false
+  IndentBraces: false
+  SplitEmptyFunction: true
+  SplitEmptyRecord: true
+  SplitEmptyNamespace: true
+BreakAfterAttributes: Always
+BreakBeforeBinaryOperators: All
+BreakBeforeBraces: Custom
+BreakBeforeInlineASMColon: Always
+BreakTemplateDeclarations: Yes
+ColumnLimit: 100
+EmptyLineBeforeAccessModifier: Always
+IndentCaseBlocks: true
+IndentExternBlock: NoIndent
+IndentPPDirectives: AfterHash
+IndentWidth: 4
+InsertBraces: true
+InsertNewlineAtEOF: true
+KeepEmptyLines:
+  AtStartOfBlock: false
+  AtStartOfFile: false
+LineEnding: LF
+PackConstructorInitializers: NextLine
+QualifierAlignment: Left
+RemoveParentheses: ReturnStatement
+SeparateDefinitionBlocks: Always
+SpaceBeforeJsonColon: true
+Language: Cpp

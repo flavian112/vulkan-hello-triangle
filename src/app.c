@@ -84,13 +84,15 @@ void app_run(app_t *app) {
     while (!platform_window_should_close(app->window)) {
         platform_window_poll(app->window);
 
-        draw_result_t draw_result = draw_frame(&app->device,
-                                               &app->swapchain,
-                                               &app->renderpass,
-                                               &app->pipeline,
-                                               &app->commands,
-                                               &app->sync,
-                                               &app->current_frame);
+        draw_result_t draw_result = draw_frame(
+            &app->device,
+            &app->swapchain,
+            &app->renderpass,
+            &app->pipeline,
+            &app->commands,
+            &app->sync,
+            &app->current_frame
+        );
 
         if (draw_result == DRAW_NEED_RECREATE) {
             if (!swapchain_recreate(&app->swapchain, &app->device, app->surface, app->window)) {
@@ -109,7 +111,9 @@ void app_run(app_t *app) {
                     break;
                 }
             } else {
-                if (!renderpass_recreate_framebuffers(&app->renderpass, &app->device, &app->swapchain)) {
+                if (!renderpass_recreate_framebuffers(
+                        &app->renderpass, &app->device, &app->swapchain
+                    )) {
                     break;
                 }
             }
